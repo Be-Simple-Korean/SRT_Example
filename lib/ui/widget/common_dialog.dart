@@ -5,10 +5,10 @@ import 'package:srt_ljh/ui/widget/notosans_text.dart';
 
 /// 공통 팝업
 class CommonDialog {
-  
   /// 에러 팝업 노출
-  static void showErrDialog(BuildContext context,String content, String leftText, String rightText) {
-      showSimpleDialog(context!, content, leftText, rightText);
+  static void showErrDialog(
+      BuildContext context, String content, String leftText, String rightText) {
+    showSimpleDialog(context!, content, leftText, rightText);
   }
 
   /// 팝업 노출

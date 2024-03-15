@@ -39,7 +39,6 @@ class _SelectStationState extends State<SelectStation> {
 
   @override
   Widget build(BuildContext context) {
-    print("SelectStation build");
     return SafeArea(
         child: Scaffold(
       body: ChangeNotifierProvider(
@@ -132,12 +131,10 @@ class _SelectStationState extends State<SelectStation> {
                               callback: () {
                                 String selectedStartStation =
                                     Provider.of<SelectPlaceNotifier>(context)
-                                            .startPlace ??
-                                        SELECT_STATION_DEFAULT;
+                                            .startPlace;
                                 String selectedFinishStation =
                                     Provider.of<SelectPlaceNotifier>(context)
-                                            .finishPlace ??
-                                        SELECT_STATION_DEFAULT;
+                                            .finishPlace;
                                 context.pop({
                                   SELECT_STATION_START: selectedStartStation,
                                   SELECT_STATION_FINISH: selectedFinishStation
@@ -216,15 +213,12 @@ class _StationBarState extends State<StationBar> {
   String _selected = "";
   @override
   void initState() {
-    print("StationBar initState");
-    // TODO: implement initState
     super.initState();
     _selected = widget.selected;
   }
 
   @override
   Widget build(BuildContext context) {
-    print("StationBar build");
     String selectedStartStation =
         Provider.of<SelectPlaceNotifier>(context).startPlace;
     String selectedFinishStation =
