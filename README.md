@@ -1,3 +1,3 @@
-# srt_ljh
+# srt_ljh(FLutter)
 
-A new Flutter project.
+- SRT 샘플 앱 개발
