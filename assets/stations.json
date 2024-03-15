@@ -1,0 +1,74 @@
+[
+    {
+      "stationNm": "수서",
+      "stationId": "NATH30000"
+    },
+    {
+      "stationNm": "동탄",
+      "stationId": "NATH30326"
+    },
+    {
+      "stationNm": "평택지제",
+      "stationId": ""
+    },
+    {
+      "stationNm": "천안아산",
+      "stationId": "NATH10960"
+    },
+    {
+      "stationNm": "오송",
+      "stationId": "NAT050044"
+    },
+    {
+      "stationNm": "공주",
+      "stationId": "NATH20438"
+    },
+    {
+      "stationNm": "익산",
+      "stationId": "NAT030879"
+    },
+    {
+      "stationNm": "정읍",
+      "stationId": "NAT031314"
+    },
+    {
+      "stationNm": "나주",
+      "stationId": "NAT031998"
+    },
+    {
+      "stationNm": "목포",
+      "stationId": "NAT032563"
+    },
+    {
+      "stationNm": "대전",
+      "stationId": "NAT011668"
+    },
+    {
+      "stationNm": "김천구미",
+      "stationId": "NATH12383"
+    },
+    {
+      "stationNm": "서대구",
+      "stationId": "NAT013189"
+    },
+    {
+      "stationNm": "동대구",
+      "stationId": "NAT013271"
+    },
+    {
+      "stationNm": "신경주",
+      "stationId": "NATH13421"
+    },
+    {
+      "stationNm": "부산",
+      "stationId": "NAT014445"
+    },
+    {
+      "stationNm": "울산(통도사)",
+      "stationId": "NATH13717"
+    },
+    {
+      "stationNm": "광주송정",
+      "stationId": "NAT031857"
+    }
+  ]
