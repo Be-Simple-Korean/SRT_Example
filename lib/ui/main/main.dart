@@ -41,7 +41,7 @@ class MainScreen extends StatelessWidget {
             const SizedBox(
               height: 24,
             ),
-            const CommonButton(width: double.infinity, text: "기차 조회하기"),
+            const CommonButton(width: double.infinity, text: MAIN_SEARCH_TRAIN),
             const SizedBox(
               height: 48,
             ),
@@ -251,16 +251,12 @@ class _StationBarState extends State<StationBar> {
 
   void moveToSelectStation(BuildContext context, bool isStart) async {
     var result = await context.push(getRoutePath([ROUTER_SELECT_STATION_PATH]),
-        extra: isStart) as String?;
-    ;
+        extra: isStart) as Map<String, dynamic>?;
     if (result == null) {
       return;
     }
-    if (isStart) {
-      startStation = result ?? "";
-    } else {
-      finishStation = result ?? "";
-    }
+    startStation = result[SELECT_STATION_START];
+    finishStation = result[SELECT_STATION_FINISH];
   }
 }
 

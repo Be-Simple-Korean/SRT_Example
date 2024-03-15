@@ -8,8 +8,10 @@ class CommonButton extends StatelessWidget {
       {super.key,
       required this.width,
       required this.text,
+      this.isEnabled = false,
       this.callback});
   final String text;
+  final bool isEnabled;
   final double width;
   final Function()? callback;
   @override
@@ -18,18 +20,20 @@ class CommonButton extends StatelessWidget {
       width: width,
       height: 48.0,
       child: ElevatedButton(
-        onPressed: callback,
-        style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.all(Colors.white),
-          backgroundColor: MaterialStateProperty.all(clr_476eff),
-          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+          onPressed: isEnabled ? callback : null,
+          style: ButtonStyle(
+            backgroundColor:
+                MaterialStateProperty.all(isEnabled ? clr_476eff : clr_d0dae6),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           ),
-        ),
-        child: NotoSansText(text: text, textColor: Colors.white,)
-      ),
+          child: NotoSansText(
+            text: text,
+            textColor: isEnabled ? Colors.white : clr_91a1b2,
+          )),
     );
   }
 }

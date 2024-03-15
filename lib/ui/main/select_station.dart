@@ -9,23 +9,37 @@ import 'package:srt_ljh/common/images.dart';
 import 'package:srt_ljh/common/strings.dart';
 import 'package:srt_ljh/ui/main/select_station_provider.dart';
 import 'package:srt_ljh/ui/widget/common_button.dart';
+import 'package:srt_ljh/ui/widget/common_dialog.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
 
 /**
  * TODO
- * 1. 역 선택 전환
- * 2. 동일 역 선택 불가 처리
  * 3. 최근 검색 구간
- * 4. 역 선택한 결과 스왑
  * 
  *  */
 /// 역 선택 화면
-class SelectStation extends StatelessWidget {
+class SelectStation extends StatefulWidget {
   const SelectStation({super.key, required this.isStart});
 
   final bool isStart;
+
+  @override
+  State<SelectStation> createState() => _SelectStationState();
+}
+
+class _SelectStationState extends State<SelectStation> {
+  bool _isStart = false;
+  bool isButtonEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isStart = widget.isStart;
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("SelectStation build");
     return SafeArea(
         child: Scaffold(
       body: ChangeNotifierProvider(
@@ -38,7 +52,13 @@ class SelectStation extends StatelessWidget {
                   height: 16,
                 ),
                 StationBar(
-                  selected: isStart ? "출발" : "도착",
+                  selected:
+                      _isStart ? SELECT_STATION_START : SELECT_STATION_FINISH,
+                  chagneState: (isStart) {
+                    _isStart = isStart;
+                    Provider.of<SelectPlaceNotifier>(context, listen: false)
+                        .resetIndex();
+                  },
                 ),
                 const SizedBox(
                   height: 32,
@@ -51,7 +71,7 @@ class SelectStation extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.only(left: 24),
                   child: const NotoSansText(
-                    text: "정차역",
+                    text: SELECT_STATION_LIST_TITLE,
                     textSize: 22,
                     fontWeight: FontWeight.w500,
                   ),
@@ -60,49 +80,74 @@ class SelectStation extends StatelessWidget {
                   height: 14,
                 ),
                 Expanded(
-                  // 여기에 Expanded 추가
-                  child: ChangeNotifierProvider(
-                    create: (context) => SelectStationNotifier(),
-                    child: Stack(
-                      children: [
-                        const Positioned.fill(
-                          child: SelectStationGridView(),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: SelectStationGridView(
+                          stationCallback: (station) {
+                            if (_isStart) {
+                              Provider.of<SelectPlaceNotifier>(context,
+                                      listen: false)
+                                  .setStart(station);
+                            } else {
+                              Provider.of<SelectPlaceNotifier>(context,
+                                      listen: false)
+                                  .setFinish(station);
+                            }
+                            bool isComplete = Provider.of<SelectPlaceNotifier>(
+                                    context,
+                                    listen: false)
+                                .getCheckCompleteStation();
+                            if (isComplete) {
+                              setState(() {
+                                isButtonEnabled = true;
+                              });
+                            }
+                          },
                         ),
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          child: Container(
-                            height: 80,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                                colors: [
-                                  Colors.white,
-                                  Colors.white.withOpacity(0.01),
-                                ],
-                                stops: const [0.9, 1.0],
-                              ),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          height: 80,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                Colors.white,
+                                Colors.white.withOpacity(0.01),
+                              ],
+                              stops: const [0.9, 1.0],
                             ),
-                            child: Consumer<SelectStationNotifier>(
-                              builder: (context, notifier, child) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: CommonButton(
-                                    width: double.infinity,
-                                    text: "선택완료",
-                                    callback: () {
-                                      context.pop(notifier.selectedStation);
-                                    },
-                                  ),
-                                );
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: CommonButton(
+                              width: double.infinity,
+                              text: SELECT_STATION_COMPLETE,
+                              isEnabled: isButtonEnabled,
+                              callback: () {
+                                String selectedStartStation =
+                                    Provider.of<SelectPlaceNotifier>(context)
+                                            .startPlace ??
+                                        SELECT_STATION_DEFAULT;
+                                String selectedFinishStation =
+                                    Provider.of<SelectPlaceNotifier>(context)
+                                            .finishPlace ??
+                                        SELECT_STATION_DEFAULT;
+                                context.pop({
+                                  SELECT_STATION_START: selectedStartStation,
+                                  SELECT_STATION_FINISH: selectedFinishStation
+                                });
                               },
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -158,10 +203,11 @@ class Header extends StatelessWidget {
 
 /// 역 선택 위젯
 class StationBar extends StatefulWidget {
-  const StationBar({super.key, required this.selected});
+  const StationBar(
+      {super.key, required this.selected, required this.chagneState});
 
   final String selected;
-
+  final Function(bool) chagneState;
   @override
   State<StationBar> createState() => _StationBarState();
 }
@@ -170,6 +216,7 @@ class _StationBarState extends State<StationBar> {
   String _selected = "";
   @override
   void initState() {
+    print("StationBar initState");
     // TODO: implement initState
     super.initState();
     _selected = widget.selected;
@@ -177,6 +224,11 @@ class _StationBarState extends State<StationBar> {
 
   @override
   Widget build(BuildContext context) {
+    print("StationBar build");
+    String selectedStartStation =
+        Provider.of<SelectPlaceNotifier>(context).startPlace;
+    String selectedFinishStation =
+        Provider.of<SelectPlaceNotifier>(context).finishPlace;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       width: double.infinity,
@@ -206,50 +258,59 @@ class _StationBarState extends State<StationBar> {
                   ),
                   InkWell(
                     onTap: () {
-                      if (_selected != "출발") {
+                      if (_selected != SELECT_STATION_START) {
                         setState(() {
-                          _selected = "출발";
+                          _selected = SELECT_STATION_START;
                         });
-                        Provider.of<SelectPlaceNotifier>(context, listen: false)
-                            .setPlace(PLACE.START);
+                        widget.chagneState(true);
                       }
                     },
                     child: NotoSansText(
-                      text: MAIN_STATION_CHOICE_TITLE,
-                      textColor: _selected == "출발" ? clr_476eff : clr_bbbbbb,
+                      text: selectedStartStation,
+                      textColor: _selected == SELECT_STATION_START
+                          ? clr_476eff
+                          : clr_bbbbbb,
                       textSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               )),
-          SizedBox(
-              width: 48,
-              height: 48,
-              child: Image.asset(AppImages.IMAGE_ICO_CHANGE_DARK)),
+          InkWell(
+            onTap: () {
+              if (selectedStartStation != SELECT_STATION_DEFAULT &&
+                  selectedFinishStation != SELECT_STATION_DEFAULT) {
+                Provider.of<SelectPlaceNotifier>(context, listen: false)
+                    .swapStation();
+              }
+            },
+            child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Image.asset(AppImages.IMAGE_ICO_CHANGE_DARK)),
+          ),
           Expanded(
             flex: 1,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                NotoSansText(
+                const NotoSansText(
                   text: MAIN_FINISH_STATION,
                   textColor: clr_bbbbbb,
                   textSize: 13,
                 ),
                 InkWell(
                   onTap: () {
-                    if (_selected != "도착") {
+                    if (_selected != SELECT_STATION_FINISH) {
                       setState(() {
-                        _selected = "도착";
+                        _selected = SELECT_STATION_FINISH;
                       });
-                      Provider.of<SelectPlaceNotifier>(context, listen: false)
-                          .setPlace(PLACE.FINISH);
+                      widget.chagneState(false);
                     }
                   },
                   child: NotoSansText(
-                    text: MAIN_STATION_CHOICE_TITLE,
-                    textColor: _selected == "도착" ? clr_476eff : clr_bbbbbb,
+                    text: selectedFinishStation,
+                    textColor: _selected == SELECT_STATION_FINISH ? clr_476eff : clr_bbbbbb,
                     textSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -325,8 +386,9 @@ class RecentReservationItem extends StatelessWidget {
 
 /// 역 선택 그리드 뷰
 class SelectStationGridView extends StatefulWidget {
-  const SelectStationGridView({super.key});
+  const SelectStationGridView({super.key, required this.stationCallback});
 
+  final Function(String) stationCallback;
   @override
   State<SelectStationGridView> createState() => _SelectStationGridViewState();
 }
@@ -350,25 +412,36 @@ class _SelectStationGridViewState extends State<SelectStationGridView> {
               return Text('Error: ${snapshot.error}');
             }
             var data = snapshot.data;
+            selectedIndex =
+                Provider.of<SelectPlaceNotifier>(context).selectedIndex;
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: GridView.builder(
                   itemCount: snapshot.data?.length ?? 0,
                   itemBuilder: (context, index) {
                     return InkWell(
-                      onTap: () {
-                        setState(() {
-                          selectedIndex = index;
-                        });
-                        Provider.of<SelectStationNotifier>(context,
-                                listen: false)
-                            .selectStation(data?[index]["stationNm"]);
+                      onTap: () async {
+                        String station = data?[index]["stationNm"];
+                        bool isSame = await getCompareStation(context, station);
+                        if (isSame) {
+                          if (mounted) {
+                            CommonDialog.showErrDialog(
+                                context, SELECT_STATION_SELECT_ERROR_MESSAGE, "", BUTTON_CONFIRM);
+                          }
+                          return;
+                        }
+                        if (mounted) {
+                          Provider.of<SelectPlaceNotifier>(context,
+                                  listen: false)
+                              .selectIndex(index);
+                          widget.stationCallback(station);
+                        }
                       },
                       child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                             color: index == selectedIndex
-                                ? Colors.blue
+                                ? clr_476eff
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: clr_cccccc)),
@@ -402,5 +475,15 @@ class _SelectStationGridViewState extends State<SelectStationGridView> {
     // JSON 변환
     final data = await json.decode(response);
     return data;
+  }
+
+  Future<bool> getCompareStation(BuildContext context, String station) async {
+    String selectedStartStation =
+        Provider.of<SelectPlaceNotifier>(context, listen: false).startPlace;
+    if (selectedStartStation == station) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

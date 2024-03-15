@@ -4,6 +4,9 @@ const ROUTER_REGISTER_PATH = 'register';
 const ROUTER_MAIN_PATH = 'main';
 const ROUTER_SELECT_STATION_PATH = 'select_station';
 
+// common_dialog.dart
+const BUTTON_CONFIRM = "확인";
+
 // login.dart
 const LOGIN_TEXT_FIELD_TITLE_ID = "ID";
 const LOGIN_TEXT_FIELD_TITLE_PW = "PW";
@@ -42,6 +45,13 @@ const MAIN_STATION_CHOICE_TITLE = "선택";
 const MAIN_RECENT_RESERVATION_TITLE = "최근 예매 구간";
 const MAIN_SELECT_DATE_TITLE = "날짜";
 const MAIN_SELECT_PEOPLE_TITLE = "인원";
+const MAIN_SEARCH_TRAIN = "기차 조회하기";
 
 //select_station.dart
 const SELECT_STATION_TITLE = "역 선택";
+const SELECT_STATION_START = "출발";
+const SELECT_STATION_FINISH = "도착";
+const SELECT_STATION_LIST_TITLE = "정차역";
+const SELECT_STATION_COMPLETE = "선택완료";
+const SELECT_STATION_DEFAULT = "선택";
+const SELECT_STATION_SELECT_ERROR_MESSAGE = "같은 역은 선택할 수 없습니다.";
