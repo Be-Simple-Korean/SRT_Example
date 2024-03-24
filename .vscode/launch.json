@@ -5,30 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "srt_main",
+            "name": "srt",
             "request": "launch",
             "type": "dart",
-            "program": "lib/ui/main/main.dart" 
+            "program": "lib/init.dart" 
         },
         {
-            "name": "srt_ljh",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/ui/login/login.dart" 
-        },
-        {
-            "name": "srt_ljh (profile mode)",
+            "name": "srt (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
-            "program": "lib/ui/login/login.dart" 
+            "program": "lib/init.dart" 
         },
         {
-            "name": "srt_ljh (release mode)",
+            "name": "srt (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release",
-            "program": "lib/ui/login/login.dart" 
+            "program": "lib/init.dart" 
         }
     ]
 }

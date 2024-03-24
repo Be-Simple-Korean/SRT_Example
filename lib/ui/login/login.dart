@@ -6,66 +6,13 @@ import 'package:srt_ljh/common/colors.dart';
 import 'package:srt_ljh/common/images.dart';
 import 'package:srt_ljh/common/strings.dart';
 import 'package:srt_ljh/common/theme/theme_provider.dart';
-import 'package:srt_ljh/network/network_manager.dart';
 import 'package:srt_ljh/common/Utils.dart';
 import 'package:provider/provider.dart';
-import 'package:srt_ljh/ui/main/select_station.dart';
+import 'package:srt_ljh/model/login_response.dart';
+import 'package:srt_ljh/ui/login/login_viewmodel.dart';
 import 'package:srt_ljh/ui/widget/common_button.dart';
 import 'package:srt_ljh/ui/widget/common_dialog.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
-import 'package:srt_ljh/ui/main/main.dart';
-import 'package:srt_ljh/ui/register/register_input.dart';
-import 'package:srt_ljh/ui/register/register_auth.dart';
-import 'package:srt_ljh/ui/register/register_providers.dart';
-
-void main() {
-  runApp(MaterialApp.router(
-    debugShowCheckedModeBanner: false,
-    routerConfig: _router,
-  ));
-}
-
-final GoRouter _router = GoRouter(
-  routes: <RouteBase>[
-    GoRoute(
-        path: ROUTER_ROOT_PATH,
-        builder: (BuildContext context, GoRouterState state) {
-          return const LoginScreen();
-        },
-        routes: [
-          GoRoute(
-              path: ROUTER_REGISTER_AUTH_PATH,
-              builder: (context, state) {
-                return ChangeNotifierProvider(
-                  create: (context) => AuthController(),
-                  child: const RegisterAuth(),
-                );
-              },
-              routes: [
-                GoRoute(
-                  path: ROUTER_REGISTER_PATH,
-                  builder: (context, state) {
-                    String email = (state.extra ?? "") as String;
-                    return Register(email: email);
-                  },
-                )
-              ]),
-          GoRoute(
-            path: ROUTER_SELECT_STATION_PATH,
-            builder: (context, state) {
-              var extras = state.extra as Map<String, dynamic>;
-              return SelectStation(extras: extras);
-            },
-          ),
-          GoRoute(
-            path: ROUTER_MAIN_PATH,
-            builder: (context, state) {
-              return MainScreen();
-            },
-          )
-        ]),
-  ],
-);
 
 /// 로그인 화면
 class LoginScreen extends StatefulWidget {
@@ -81,24 +28,13 @@ class _LoginAppState extends State<LoginScreen> {
   bool isSaved = false;
   bool isButtonEnabled = false;
 
-  /// 로그인 요청
-  Future<Map<String, dynamic>> requstLogin(Map<String, dynamic> params) async {
-    try {
-      return await NetworkManager().login(params);
-    } catch (e) {
-      print('Network request error: $e');
-      rethrow;
-    }
-  }
-
   /// 로그인 결과 처리
   Future<void> handleLoginResult(
-      BuildContext context, Map<String, dynamic> result) async {
-    switch (result["code"]) {
+      BuildContext context, LoginResponse result) async {
+    switch (result.code) {
       case 0:
-        if (result["message"] == SUCCESS_MESSAGE) {
-          print("로그인 성공");
-          context.go(getRoutePath([ROUTER_MAIN_PATH]));
+        if (result.message == SUCCESS_MESSAGE) {
+          GoRouter.of(context).go(getRoutePath([ROUTER_MAIN_PATH]));
         } else {}
         break;
       case 10:
@@ -118,24 +54,7 @@ class _LoginAppState extends State<LoginScreen> {
     }
   }
 
-  /// 로그인 프로세스
-  Future<bool> loginProcess(
-      BuildContext context, Map<String, dynamic> params) async {
-    try {
-      Map<String, dynamic> result = await requstLogin(params);
-      if (mounted) {
-        await handleLoginResult(context, result);
-      }
-      return true;
-    } catch (e) {
-      // 네트워크 요청 실패 처리
-      if (mounted) {
-        CommonDialog.showErrDialog(context, "네트워크 오류가 발생했습니다.", "", "확인");
-      }
-      return false;
-    }
-  }
-
+  /// id 가져오기
   Future<void> getId() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     id = pref.getString(PREFS_KEY_ID) ?? "";
@@ -146,6 +65,7 @@ class _LoginAppState extends State<LoginScreen> {
     }
   }
 
+  /// 버튼 enabled 변경
   void setButtonEnabled() {
     setState(() {
       if (id.isNotEmpty && pwd.isNotEmpty) {
@@ -222,28 +142,23 @@ class _LoginAppState extends State<LoginScreen> {
                               },
                             ),
                             const SizedBox(height: 25.0),
-                            CommonButton(
-                              isEnabled: isButtonEnabled,
-                              text: LOGIN_BUTTON_TITLE,
-                              width: double.infinity,
-                              callback: () async {
-                                if (id.isEmpty || pwd.isEmpty) {
-                                  return;
-                                }
-                                Map<String, dynamic> params = {};
-                                params["email"] = id;
-                                params["pw"] = pwd;
-                                var result =
-                                    await loginProcess(context, params);
-                                if (mounted) {
-                                  if (result) {
-                                    print("로그인 성공");
-                                    context
-                                        .go(getRoutePath([ROUTER_MAIN_PATH]));
-                                  } else {
-                                    print("로그인 실패");
-                                  }
-                                }
+                            Consumer<LoginViewModel>(
+                              builder: (context, loginViewModel, child) {
+                                return CommonButton(
+                                  isEnabled: isButtonEnabled,
+                                  text: LOGIN_BUTTON_TITLE,
+                                  width: double.infinity,
+                                  callback: () async {
+                                    if (id.isEmpty || pwd.isEmpty) {
+                                      return;
+                                    }
+                                    var result = await loginViewModel
+                                        .requestLogin(id, pwd);
+                                    if (result != null && mounted) {
+                                      handleLoginResult(context, result);
+                                    }
+                                  },
+                                );
                               },
                             ),
                             const SizedBox(height: 14.0),
