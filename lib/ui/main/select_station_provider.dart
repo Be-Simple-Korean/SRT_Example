@@ -1,17 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:srt_ljh/common/strings.dart';
 
-class SelectStationNotifier extends ChangeNotifier {
-  String? _selectedStation;
-
-  String? get selectedStation => _selectedStation;
-
-  void selectStation(String station) {
-    _selectedStation = station;
-    notifyListeners();
-  }
-}
-
 /// 현재의 선택역 위치 상태 - 출발 or 도착, 선택역
 class SelectPlaceNotifier extends ChangeNotifier {
   PLACE? _place;
@@ -23,10 +12,20 @@ class SelectPlaceNotifier extends ChangeNotifier {
   String get startPlace => _startPlace;
   String get finishPlace => _finishPlace;
   int get selectedIndex => _selectedIndex;
+  
+  SelectPlaceNotifier(this._startPlace,this._finishPlace);
 
   void setPlace(PLACE place) {
     _place = place;
     resetIndex();
+  }
+
+  void initStart(String start) {
+    _startPlace = start.isEmpty ? SELECT_STATION_DEFAULT : start;
+  }
+
+  void initFinish(String finish) {
+    _finishPlace = finish.isEmpty ? SELECT_STATION_DEFAULT : finish;
   }
 
   void setStart(String start) {
@@ -50,14 +49,15 @@ class SelectPlaceNotifier extends ChangeNotifier {
   }
 
   void swapStation() {
-    String temp = _startPlace!;
-    _startPlace = _finishPlace!;
+    String temp = _startPlace;
+    _startPlace = _finishPlace;
     _finishPlace = temp;
     notifyListeners();
   }
 
   bool getCheckCompleteStation() {
-    if (_startPlace != SELECT_STATION_DEFAULT && _finishPlace != SELECT_STATION_DEFAULT) {
+    if (_startPlace != SELECT_STATION_DEFAULT &&
+        _finishPlace != SELECT_STATION_DEFAULT) {
       return true;
     } else {
       return false;

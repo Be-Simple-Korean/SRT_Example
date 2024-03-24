@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:srt_ljh/common/Constants.dart';
+import 'package:srt_ljh/common/colors.dart';
 import 'package:srt_ljh/common/images.dart';
 import 'package:srt_ljh/common/strings.dart';
+import 'package:srt_ljh/common/theme/theme_provider.dart';
 import 'package:srt_ljh/network/network_manager.dart';
-import 'package:srt_ljh/common/Colors.dart';
 import 'package:srt_ljh/common/Utils.dart';
 import 'package:provider/provider.dart';
 import 'package:srt_ljh/ui/main/select_station.dart';
@@ -29,8 +30,7 @@ final GoRouter _router = GoRouter(
     GoRoute(
         path: ROUTER_ROOT_PATH,
         builder: (BuildContext context, GoRouterState state) {
-          // return const LoginScreen();
-          return const MainScreen();
+          return const LoginScreen();
         },
         routes: [
           GoRoute(
@@ -53,18 +53,16 @@ final GoRouter _router = GoRouter(
           GoRoute(
             path: ROUTER_SELECT_STATION_PATH,
             builder: (context, state) {
-              bool isStart = (state.extra ?? "") as bool;
-              return SelectStation(
-                isStart: isStart,
-              );
+              var extras = state.extra as Map<String, dynamic>;
+              return SelectStation(extras: extras);
+            },
+          ),
+          GoRoute(
+            path: ROUTER_MAIN_PATH,
+            builder: (context, state) {
+              return MainScreen();
             },
           )
-          // GoRoute(
-          //   path: ROUTER_MAIN_PATH,
-          //   builder: (context, state) {
-          //     return MainScreen();
-          //   },
-          // )
         ]),
   ],
 );
@@ -79,7 +77,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginAppState extends State<LoginScreen> {
   String id = "";
+  String pwd = "";
   bool isSaved = false;
+  bool isButtonEnabled = false;
 
   /// 로그인 요청
   Future<Map<String, dynamic>> requstLogin(Map<String, dynamic> params) async {
@@ -146,6 +146,16 @@ class _LoginAppState extends State<LoginScreen> {
     }
   }
 
+  void setButtonEnabled() {
+    setState(() {
+      if (id.isNotEmpty && pwd.isNotEmpty) {
+        isButtonEnabled = true;
+      } else {
+        isButtonEnabled = false;
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -154,108 +164,135 @@ class _LoginAppState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String pwd = "";
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: SafeArea(
-          child: Column(
-            children: <Widget>[
-              Container(
-                alignment: Alignment.centerLeft,
-                margin: const EdgeInsets.only(top: 40.0, left: 28.00),
-                child: Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO),
-              ),
-              const SizedBox(height: 97.0),
-              Center(
-                child: Image.asset(AppImages.IMAGE_LOGO),
-              ),
-              const SizedBox(height: 97.0),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  children: [
-                    LoginTextField(
-                      title: LOGIN_TEXT_FIELD_TITLE_ID,
-                      text: id,
-                      getText: (text) {
-                        id = text;
-                      },
-                    ),
-                    const SizedBox(height: 12.0),
-                    LoginTextField(
-                      title: LOGIN_TEXT_FIELD_TITLE_PW,
-                      getText: (text) {
-                        pwd = text;
-                      },
-                    ),
-                    const SizedBox(height: 25.0),
-                    CommonButton(
-                      text: LOGIN_BUTTON_TITLE,
-                      width: double.infinity,
-                      callback: () async {
-                        if (id.isEmpty || pwd.isEmpty) {
-                          return;
-                        }
-                        Map<String, dynamic> params = {};
-                        params["email"] = id;
-                        params["pw"] = pwd;
-                        var result = await loginProcess(context, params);
-                        if (mounted) {
-                          if (result) {
-                            print("로그인 성공");
-                            context.go(getRoutePath([ROUTER_MAIN_PATH]));
-                          } else {
-                            print("로그인 실패");
-                          }
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 14.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ImgToggleWithText(
-                          callback: (isToggle) async {
-                            SharedPreferences pref =
-                                await SharedPreferences.getInstance();
-                            if (isToggle) {
-                              pref.setString(PREFS_KEY_ID, id);
-                              setState(() {
-                                isSaved = true;
-                              });
-                            } else {
-                              pref.setString(PREFS_KEY_ID, "");
-                              setState(() {
-                                isSaved = false;
-                              });
-                            }
-                          },
-                          isSaved: isSaved,
+    return ChangeNotifierProvider(
+        create: (context) => ThemeProvider(),
+        builder: (context, child) {
+          return Consumer<ThemeProvider>(
+              builder: (context, themeProvider, child) {
+            bool isDark = themeProvider.currentTheme == ThemeMode.dark;
+            return MaterialApp(
+              theme: themeProvider.lightThemeData,
+              darkTheme: themeProvider.darkThemeData,
+              themeMode: themeProvider.currentTheme,
+              debugShowCheckedModeBanner: false,
+              home: Scaffold(
+                resizeToAvoidBottomInset: false,
+                body: SafeArea(
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        margin: const EdgeInsets.only(top: 40.0, left: 28.00),
+                        child: isDark
+                            ? ColorFiltered(
+                                colorFilter: const ColorFilter.mode(
+                                    Colors.white, BlendMode.srcIn),
+                                child:
+                                    Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO))
+                            : Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO),
+                      ),
+                      const SizedBox(height: 97.0),
+                      Center(
+                        child: isDark
+                            ? ColorFiltered(
+                                colorFilter: const ColorFilter.mode(
+                                    clr_dedede, BlendMode.srcIn),
+                                child: Image.asset(AppImages.IMAGE_LOGO))
+                            : Image.asset(AppImages.IMAGE_LOGO),
+                      ),
+                      const SizedBox(height: 97.0),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: Column(
+                          children: [
+                            LoginTextField(
+                              title: LOGIN_TEXT_FIELD_TITLE_ID,
+                              text: id,
+                              getText: (text) {
+                                id = text;
+                                setButtonEnabled();
+                              },
+                            ),
+                            const SizedBox(height: 12.0),
+                            LoginTextField(
+                              title: LOGIN_TEXT_FIELD_TITLE_PW,
+                              getText: (text) {
+                                pwd = text;
+                                setButtonEnabled();
+                              },
+                            ),
+                            const SizedBox(height: 25.0),
+                            CommonButton(
+                              isEnabled: isButtonEnabled,
+                              text: LOGIN_BUTTON_TITLE,
+                              width: double.infinity,
+                              callback: () async {
+                                if (id.isEmpty || pwd.isEmpty) {
+                                  return;
+                                }
+                                Map<String, dynamic> params = {};
+                                params["email"] = id;
+                                params["pw"] = pwd;
+                                var result =
+                                    await loginProcess(context, params);
+                                if (mounted) {
+                                  if (result) {
+                                    print("로그인 성공");
+                                    context
+                                        .go(getRoutePath([ROUTER_MAIN_PATH]));
+                                  } else {
+                                    print("로그인 실패");
+                                  }
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 14.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                ImgToggleWithText(
+                                  callback: (isToggle) async {
+                                    SharedPreferences pref =
+                                        await SharedPreferences.getInstance();
+                                    if (isToggle) {
+                                      pref.setString(PREFS_KEY_ID, id);
+                                      setState(() {
+                                        isSaved = true;
+                                      });
+                                    } else {
+                                      pref.setString(PREFS_KEY_ID, "");
+                                      setState(() {
+                                        isSaved = false;
+                                      });
+                                    }
+                                  },
+                                  isSaved: isSaved,
+                                ),
+                                const Spacer(),
+                                InkWell(
+                                    onTap: () {
+                                      context.go(getRoutePath(
+                                          [ROUTER_REGISTER_AUTH_PATH]));
+                                    },
+                                    child: NotoSansText(
+                                      text: LOGIN_GO_REGISTER,
+                                      textColor:
+                                          isDark ? clr_666666 : clr_727b90,
+                                      textSize: 17,
+                                      isHaveUnderline: true,
+                                    ))
+                              ],
+                            ),
+                          ],
                         ),
-                        const Spacer(),
-                        InkWell(
-                            onTap: () {
-                              context.go(
-                                  getRoutePath([ROUTER_REGISTER_AUTH_PATH]));
-                            },
-                            child: const NotoSansText(
-                              text: LOGIN_GO_REGISTER,
-                              textColor: clr_666666,
-                              textSize: 17,
-                              isHaveUnderline: true,
-                            ))
-                      ],
-                    ),
-                  ],
+                      )
+                    ],
+                  ),
                 ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
+              ),
+            );
+          });
+        });
   }
 }
 
@@ -288,48 +325,58 @@ class _LoginTextFieldState extends State<LoginTextField> {
     if (widget.title == LOGIN_TEXT_FIELD_TITLE_ID && widget.text.isNotEmpty) {
       controller.text = widget.text;
     }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      height: 62,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: clr_eeeeee, width: 1.0),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          NotoSansText(text: widget.title, textColor: clr_888888),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Focus(
-              onFocusChange: (hasFocus) {
-                if (!hasFocus) {
-                  var text = "";
-                  if (formatter == null) {
-                    text = controller.text;
-                  } else {
-                    text = formatter?.getRealText() ?? "";
-                  }
-                  widget.getText?.call(text);
-                }
-              },
-              child: TextField(
-                controller: controller,
-                inputFormatters: widget.title == LOGIN_TEXT_FIELD_TITLE_PW
-                    ? [formatter!]
-                    : null,
-                cursorHeight: 22.0,
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                ),
-                style: const TextStyle(fontSize: 16, fontFamily: FONT_NOTOSANS),
-              ),
-            ),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          height: 62,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            border: Border.all(
+                color: Theme.of(context).colorScheme.secondary, width: 1.0),
+            borderRadius: BorderRadius.circular(10),
           ),
-        ],
-      ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              NotoSansText(
+                  text: widget.title,
+                  textColor: Theme.of(context).colorScheme.onSecondary),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Focus(
+                  onFocusChange: (hasFocus) {
+                    if (!hasFocus) {
+                      var text = "";
+                      if (formatter == null) {
+                        text = controller.text;
+                      } else {
+                        text = formatter?.getRealText() ?? "";
+                      }
+                      widget.getText?.call(text);
+                    }
+                  },
+                  child: TextField(
+                    controller: controller,
+                    inputFormatters: widget.title == LOGIN_TEXT_FIELD_TITLE_PW
+                        ? [formatter!]
+                        : null,
+                    cursorHeight: 22.0,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                    ),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 16,
+                        fontFamily: FONT_NOTOSANS),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

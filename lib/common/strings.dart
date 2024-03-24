@@ -4,6 +4,7 @@ const ROUTER_REGISTER_PATH = 'register';
 const ROUTER_MAIN_PATH = 'main';
 const ROUTER_SELECT_STATION_PATH = 'select_station';
 
+const ALL_SELECT_ALL = "선택완료";
 // common_dialog.dart
 const BUTTON_CONFIRM = "확인";
 
@@ -46,6 +47,12 @@ const MAIN_RECENT_RESERVATION_TITLE = "최근 예매 구간";
 const MAIN_SELECT_DATE_TITLE = "날짜";
 const MAIN_SELECT_PEOPLE_TITLE = "인원";
 const MAIN_SEARCH_TRAIN = "기차 조회하기";
+const MAIN_DEFAULT_PEOPLE = "1명";
+const MAIN_RESERVATION_SERVICE_TERMS_TITLE = "예매 서비스 이용약관";
+const MAIN_RESERVATION_SERVICE_TERMS_URL =
+    "http://dpms.openobject.net:4132/terms/terms_use_service.html";
+const MAIN_SELLER_GUIDE =
+    "통신판매중개자로, 통신판매의 당사자가 아닙니다.\n예매 및 환불 등 거래에 대한 의무와 책임은 거래 당사자인\n한국철도공사에 있습니다.";
 
 //select_station.dart
 const SELECT_STATION_TITLE = "역 선택";
@@ -55,3 +62,9 @@ const SELECT_STATION_LIST_TITLE = "정차역";
 const SELECT_STATION_COMPLETE = "선택완료";
 const SELECT_STATION_DEFAULT = "선택";
 const SELECT_STATION_SELECT_ERROR_MESSAGE = "같은 역은 선택할 수 없습니다.";
+
+// select_date_dialog.dart
+const SELECT_DATE_TITLE = "날짜 선택";
+
+// select_people_dialog.dart
+const SELECT_PEOPLE_TITLE = "인원 선택";

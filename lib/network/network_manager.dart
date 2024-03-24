@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:srt_ljh/common/Constants.dart';
+import 'package:srt_ljh/common/constants.dart';
 
 class NetworkManager {
   // 싱글톤 인스턴스 생성
@@ -66,15 +66,14 @@ class NetworkManager {
     }
   }
 
-   Future<dynamic> signUp(Map<String, dynamic> params) async {
+  Future<dynamic> signUp(Map<String, dynamic> params) async {
     String jsonData = jsonEncode(params);
     try {
-      final response =
-          await http.post(Uri.parse(BASE_URL + API_SIGN_UP),
-              headers: <String, String>{
-                'Content-Type': 'application/json',
-              },
-              body: jsonData);
+      final response = await http.post(Uri.parse(BASE_URL + API_SIGN_UP),
+          headers: <String, String>{
+            'Content-Type': 'application/json',
+          },
+          body: jsonData);
       if (response.statusCode == 200) {
         // 요청 성공 시 처리
         print('Post created: SUCCESS');
@@ -88,20 +87,39 @@ class NetworkManager {
     }
   }
 
-
-   Future<dynamic> login(Map<String, dynamic> params) async {
+  Future<dynamic> login(Map<String, dynamic> params) async {
     String jsonData = jsonEncode(params);
     try {
-      final response =
-          await http.post(Uri.parse(BASE_URL + API_LOGIN),
-              headers: <String, String>{
-                'Content-Type': 'application/json',
-              },
-              body: jsonData);
+      final response = await http.post(Uri.parse(BASE_URL + API_LOGIN),
+          headers: <String, String>{
+            'Content-Type': 'application/json',
+          },
+          body: jsonData);
       if (response.statusCode == 200) {
         // 요청 성공 시 처리
         print('Post created: SUCCESS');
         return jsonDecode(response.body);
+      } else {
+        // 요청 실패 시 처리
+        print('Request failed with status: ${response.statusCode}.');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<dynamic> requestMain() async {
+    try {
+      final response = await http.post(
+        Uri.parse(BASE_URL + API_SRT_INFO),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+      if (response.statusCode == 200) {
+        // 요청 성공 시 처리
+        print('Post created: SUCCESS');
+        return jsonDecode(utf8.decode(response.bodyBytes));
       } else {
         // 요청 실패 시 처리
         print('Request failed with status: ${response.statusCode}.');

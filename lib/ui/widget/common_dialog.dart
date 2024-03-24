@@ -8,7 +8,7 @@ class CommonDialog {
   /// 에러 팝업 노출
   static void showErrDialog(
       BuildContext context, String content, String leftText, String rightText) {
-    showSimpleDialog(context!, content, leftText, rightText);
+    showSimpleDialog(context, content, leftText, rightText);
   }
 
   /// 팝업 노출

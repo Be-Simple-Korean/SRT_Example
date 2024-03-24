@@ -19,9 +19,9 @@ import 'package:srt_ljh/ui/widget/notosans_text.dart';
  *  */
 /// 역 선택 화면
 class SelectStation extends StatefulWidget {
-  const SelectStation({super.key, required this.isStart});
+  const SelectStation({super.key, required this.extras});
 
-  final bool isStart;
+  final Map<String, dynamic> extras;
 
   @override
   State<SelectStation> createState() => _SelectStationState();
@@ -34,7 +34,11 @@ class _SelectStationState extends State<SelectStation> {
   @override
   void initState() {
     super.initState();
-    _isStart = widget.isStart;
+    _isStart = widget.extras["isStart"];
+    if (widget.extras["startStation"] != SELECT_STATION_DEFAULT &&
+        widget.extras["finishStation"] != SELECT_STATION_DEFAULT) {
+      isButtonEnabled = true;
+    }
   }
 
   @override
@@ -42,7 +46,8 @@ class _SelectStationState extends State<SelectStation> {
     return SafeArea(
         child: Scaffold(
       body: ChangeNotifierProvider(
-          create: (context) => SelectPlaceNotifier(),
+          create: (context) => SelectPlaceNotifier(
+              widget.extras["startStation"], widget.extras["finishStation"]),
           builder: (context, child) {
             return Column(
               children: [
@@ -130,11 +135,13 @@ class _SelectStationState extends State<SelectStation> {
                               isEnabled: isButtonEnabled,
                               callback: () {
                                 String selectedStartStation =
-                                    Provider.of<SelectPlaceNotifier>(context)
-                                            .startPlace;
+                                    Provider.of<SelectPlaceNotifier>(context,
+                                            listen: false)
+                                        .startPlace;
                                 String selectedFinishStation =
-                                    Provider.of<SelectPlaceNotifier>(context)
-                                            .finishPlace;
+                                    Provider.of<SelectPlaceNotifier>(context,
+                                            listen: false)
+                                        .finishPlace;
                                 context.pop({
                                   SELECT_STATION_START: selectedStartStation,
                                   SELECT_STATION_FINISH: selectedFinishStation
@@ -304,7 +311,9 @@ class _StationBarState extends State<StationBar> {
                   },
                   child: NotoSansText(
                     text: selectedFinishStation,
-                    textColor: _selected == SELECT_STATION_FINISH ? clr_476eff : clr_bbbbbb,
+                    textColor: _selected == SELECT_STATION_FINISH
+                        ? clr_476eff
+                        : clr_bbbbbb,
                     textSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -402,9 +411,6 @@ class _SelectStationGridViewState extends State<SelectStationGridView> {
         future: myFuture,
         builder: ((context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            }
             var data = snapshot.data;
             selectedIndex =
                 Provider.of<SelectPlaceNotifier>(context).selectedIndex;
@@ -420,7 +426,10 @@ class _SelectStationGridViewState extends State<SelectStationGridView> {
                         if (isSame) {
                           if (mounted) {
                             CommonDialog.showErrDialog(
-                                context, SELECT_STATION_SELECT_ERROR_MESSAGE, "", BUTTON_CONFIRM);
+                                context,
+                                SELECT_STATION_SELECT_ERROR_MESSAGE,
+                                "",
+                                BUTTON_CONFIRM);
                           }
                           return;
                         }

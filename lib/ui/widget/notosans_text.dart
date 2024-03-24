@@ -5,23 +5,29 @@ import 'package:srt_ljh/common/Constants.dart';
 class NotoSansText extends StatelessWidget {
   const NotoSansText(
       {super.key,
-      this.text,
+      this.text = "",
       this.textColor,
       this.textSize = 16,
       this.isHaveUnderline = false,
-      this.fontWeight});
+      this.lineHeight = 0,
+      this.fontWeight,
+      this.textAlign});
 
-  final String? text;
+  final String text;
+  final double lineHeight;
   final Color? textColor;
   final FontWeight? fontWeight;
   final double textSize;
   final bool isHaveUnderline;
+  final TextAlign? textAlign;
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      text ?? "",
+      text,
+      textAlign: textAlign,
       style: TextStyle(
+          height: lineHeight != 0 ? lineHeight / textSize : 0,
           decoration:
               isHaveUnderline ? TextDecoration.underline : TextDecoration.none,
           color: textColor ?? Colors.black,

@@ -8,6 +8,8 @@ const API_VERIFY_AUTH_CODE = "/verify";
 const API_SIGN_UP = "/signup";
 // 로그인
 const API_LOGIN = "/login";
+// 메인
+const API_SRT_INFO = "/srtInfo";
 
 const SUCCESS_MESSAGE = "SUCCESS";
 
