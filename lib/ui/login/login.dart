@@ -100,6 +100,7 @@ class _LoginAppState extends State<LoginScreen> {
                 body: SafeArea(
                   child: Column(
                     children: <Widget>[
+                      // 최상단 로고
                       Container(
                         alignment: Alignment.centerLeft,
                         margin: const EdgeInsets.only(top: 40.0, left: 28.00),
@@ -112,6 +113,7 @@ class _LoginAppState extends State<LoginScreen> {
                             : Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO),
                       ),
                       const SizedBox(height: 97.0),
+                      // 앱 로고
                       Center(
                         child: isDark
                             ? ColorFiltered(
@@ -125,6 +127,7 @@ class _LoginAppState extends State<LoginScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 24.0),
                         child: Column(
                           children: [
+                            // id TextField
                             LoginTextField(
                               title: LOGIN_TEXT_FIELD_TITLE_ID,
                               text: id,
@@ -134,6 +137,7 @@ class _LoginAppState extends State<LoginScreen> {
                               },
                             ),
                             const SizedBox(height: 12.0),
+                            // pwd TextField
                             LoginTextField(
                               title: LOGIN_TEXT_FIELD_TITLE_PW,
                               getText: (text) {
@@ -142,29 +146,29 @@ class _LoginAppState extends State<LoginScreen> {
                               },
                             ),
                             const SizedBox(height: 25.0),
-                            Consumer<LoginViewModel>(
-                              builder: (context, loginViewModel, child) {
-                                return CommonButton(
-                                  isEnabled: isButtonEnabled,
-                                  text: LOGIN_BUTTON_TITLE,
-                                  width: double.infinity,
-                                  callback: () async {
-                                    if (id.isEmpty || pwd.isEmpty) {
-                                      return;
-                                    }
-                                    var result = await loginViewModel
-                                        .requestLogin(id, pwd);
-                                    if (result != null && mounted) {
-                                      handleLoginResult(context, result);
-                                    }
-                                  },
-                                );
+                            // 로그인 버튼
+                            CommonButton(
+                              isEnabled: isButtonEnabled,
+                              text: LOGIN_BUTTON_TITLE,
+                              width: double.infinity,
+                              callback: () async {
+                                if (id.isEmpty || pwd.isEmpty) {
+                                  return;
+                                }
+                                var loginViewModel =
+                                    Provider.of<LoginViewModel>(context);
+                                var result =
+                                    await loginViewModel.requestLogin(id, pwd);
+                                if (result != null && mounted) {
+                                  handleLoginResult(context, result);
+                                }
                               },
                             ),
                             const SizedBox(height: 14.0),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
+                                // 아이디 저장
                                 ImgToggleWithText(
                                   callback: (isToggle) async {
                                     SharedPreferences pref =
@@ -184,6 +188,7 @@ class _LoginAppState extends State<LoginScreen> {
                                   isSaved: isSaved,
                                 ),
                                 const Spacer(),
+                                // 회원가입 이동
                                 InkWell(
                                     onTap: () {
                                       context.go(getRoutePath(
@@ -253,15 +258,25 @@ class _LoginTextFieldState extends State<LoginTextField> {
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              NotoSansText(
-                  text: widget.title,
-                  textColor: Theme.of(context).colorScheme.onSecondary),
+              Container(
+                height: 22,
+                width: 28,
+                margin: const EdgeInsets.only(top: 20),
+                child: NotoSansText(
+                    text: widget.title,
+                    fontWeight: FontWeight.w400,
+                    lineHeight: 22,
+                    textColor: Theme.of(context).colorScheme.onSecondary),
+              ),
               const SizedBox(width: 20),
               Expanded(
                 child: Focus(
                   onFocusChange: (hasFocus) {
+                    // 포커스가 해제됐을때 값을 반환
                     if (!hasFocus) {
                       var text = "";
                       if (formatter == null) {
@@ -272,19 +287,29 @@ class _LoginTextFieldState extends State<LoginTextField> {
                       widget.getText?.call(text);
                     }
                   },
-                  child: TextField(
-                    controller: controller,
-                    inputFormatters: widget.title == LOGIN_TEXT_FIELD_TITLE_PW
-                        ? [formatter!]
-                        : null,
-                    cursorHeight: 22.0,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
+                  child: SizedBox(
+                    height: 22,
+                    child: TextField(
+                      controller: controller,
+                      inputFormatters: widget.title == LOGIN_TEXT_FIELD_TITLE_PW
+                          ? [formatter!]
+                          : null,
+                      cursorColor: Theme.of(context).colorScheme.onPrimary,
+                      textAlignVertical: TextAlignVertical.center,
+                      cursorHeight: 22,
+                      decoration: InputDecoration(
+                          isDense: true,
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          hintText: widget.title == LOGIN_TEXT_FIELD_TITLE_ID
+                              ? LOGIN_ID_HINT
+                              : ""),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 16,
+                          decorationThickness: 0,
+                          fontFamily: FONT_NOTOSANS),
                     ),
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: 16,
-                        fontFamily: FONT_NOTOSANS),
                   ),
                 ),
               ),

@@ -14,6 +14,7 @@ const LOGIN_TEXT_FIELD_TITLE_PW = "PW";
 const LOGIN_BUTTON_TITLE = "로그인";
 const LOGIN_SAVE_ID = "아이디 저장";
 const LOGIN_GO_REGISTER = "회원가입";
+const LOGIN_ID_HINT = "open@openobject.net";
 
 // register_auth.dart
 const REGISTER_AUTH_TEXT_FIELD_TITLE_ID = "아이디";
