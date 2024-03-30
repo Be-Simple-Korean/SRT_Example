@@ -19,8 +19,9 @@ class CommonDialog {
         context: context,
         builder: (BuildContext context) {
           Color rightTextColor =
-              leftText.isNotEmpty ? clr_476eff : Colors.black;
+              leftText.isNotEmpty ? clr_476eff : Theme.of(context).colorScheme.onSurface;
           return Dialog(
+          backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
             insetPadding: const EdgeInsets.symmetric(horizontal: 42),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.0),
@@ -31,12 +32,12 @@ class CommonDialog {
                 Container(
                   margin: const EdgeInsets.only(
                       top: 34, left: 32, right: 32, bottom: 28),
-                  child: NotoSansText(text: content, textColor: Colors.black),
+                  child: NotoSansText(text: content, textColor: Theme.of(context).colorScheme.onSurface),
                 ),
                 Container(
                   width: double.infinity,
                   height: 1.0,
-                  color: clr_eeeeee,
+                  color: Theme.of(context).colorScheme.onSecondary,
                 ),
                 SizedBox(
                   height: 53,
@@ -50,7 +51,7 @@ class CommonDialog {
                               height: 53,
                               child: Center(
                                   child: NotoSansText(
-                                      text: leftText, textColor: clr_666666)),
+                                      text: leftText, textColor: Theme.of(context).colorScheme.onSurface)),
                             )),
                         Container(
                           width: 1.0,

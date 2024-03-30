@@ -7,57 +7,65 @@ import 'package:provider/provider.dart';
 import 'package:srt_ljh/common/colors.dart';
 import 'package:srt_ljh/common/constants.dart';
 import 'package:srt_ljh/common/images.dart';
+import 'package:srt_ljh/common/my_logger.dart';
 import 'package:srt_ljh/common/strings.dart';
 import 'package:srt_ljh/common/utils.dart';
-import 'package:srt_ljh/network/network_manager.dart';
+import 'package:srt_ljh/model/base_response.dart';
 import 'package:srt_ljh/ui/dialog/select_date_dialog.dart';
 import 'package:srt_ljh/ui/dialog/select_people_dialog.dart';
-import 'package:srt_ljh/ui/main/main_provider.dart';
-import 'package:srt_ljh/ui/widget/common_button.dart';
-import 'package:srt_ljh/ui/widget/common_dialog.dart';
+import 'package:srt_ljh/ui/main/main_viewmodel.dart';
+import 'package:srt_ljh/ui/widget/custom_button.dart';
+import 'package:srt_ljh/ui/widget/custom_dialog.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// 메인 화면
-class MainScreen extends StatefulWidget {
+class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  Widget build(BuildContext context) {
+    final mainViewmodel = Provider.of<MainViewModel>(context, listen: false);
+
+    return SafeArea(
+        child: Scaffold(
+      body: Main(mainViewmodel: mainViewmodel),
+    ));
+  }
 }
 
-class _MainScreenState extends State<MainScreen> {
+/// 메인 화면
+class Main extends StatefulWidget {
+  const Main({
+    super.key,
+    required this.mainViewmodel,
+  });
+  final MainViewModel mainViewmodel;
+  @override
+  State<Main> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<Main> {
   late Future<void> myFuture;
   Map<String, dynamic> noticeMap = {};
   List<dynamic> bannerList = [];
 
   @override
   void initState() {
-    myFuture = mainProcess();
+    myFuture = widget.mainViewmodel.requestSrtInfo();
     super.initState();
-  }
-
-  /// 메인 api 요청
-  Future<Map<String, dynamic>> requestMain() async {
-    try {
-      return await NetworkManager().requestMain();
-    } catch (e) {
-      print('Network request error: $e');
-      rethrow;
-    }
   }
 
   /// main 결과 처리
   Future<void> handleMainResult(
-      BuildContext context, Map<String, dynamic> result) async {
-    switch (result["code"]) {
+      BuildContext context, BaseResponse result) async {
+    switch (result.code) {
       case 0:
-        if (result["message"] == SUCCESS_MESSAGE) {
-          List<dynamic> notices = result["data"]["noticeList"];
+        if (result.message == SUCCESS_MESSAGE) {
+          List<dynamic> notices = result.data?["noticeList"];
           if (notices.isNotEmpty) {
             noticeMap = notices[0];
           }
-          bannerList = result["data"]["bannerList"];
+          bannerList = result.data?["bannerList"];
         } else {
           CommonDialog.showErrDialog(context, "실패", "", "확인");
         }
@@ -72,21 +80,6 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  /// 메인 수행 절차
-  Future<void> mainProcess() async {
-    try {
-      Map<String, dynamic> result = await requestMain();
-      if (mounted) {
-        await handleMainResult(context, result);
-      }
-    } catch (e) {
-      // 네트워크 요청 실패 처리
-      if (mounted) {
-        CommonDialog.showErrDialog(context, "네트워크 오류가 발생했습니다.", "", "확인");
-      }
-    }
-  }
-
   void _launchURL(String url) async {
     Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
@@ -98,120 +91,116 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
         child: FutureBuilder(
       future: myFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return ChangeNotifierProvider(
-            create: (context) => MainNotifier(),
-            child: Scaffold(
-              body: SingleChildScrollView(
-                child: Column(children: [
-                  const MainHeader(),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  const StationBar(),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  const RecentReservation(),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  SelectTrainCondition(
-                      title: MAIN_SELECT_DATE_TITLE,
-                      defaultData: getDataForTrain(DateTime.now())),
-                  const SizedBox(
-                    height: 12,
-                  ),
-                  const SelectTrainCondition(
-                      title: MAIN_SELECT_PEOPLE_TITLE,
-                      defaultData: MAIN_DEFAULT_PEOPLE),
-                  const SizedBox(
-                    height: 24,
-                  ),
-                  Consumer<MainNotifier>(
-                    builder: (context, value, child) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: CommonButton(
-                            isEnabled: value.isButtonEnabled,
-                            width: double.infinity,
-                            text: MAIN_SEARCH_TRAIN),
-                      );
-                    },
-                  ),
-                  const SizedBox(
-                    height: 48,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: InkWell(
-                      onTap: () => _launchURL(noticeMap["linkUrl"]),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Image.asset(AppImages.IMAGE_ICO_BELL),
-                          ),
-                          const SizedBox(
-                            width: 8,
-                          ),
-                          NotoSansText(
-                            text: noticeMap["title"],
-                            fontWeight: FontWeight.w500,
-                            textSize: 14,
-                          ),
-                          const Spacer(),
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Image.asset(AppImages.IMAGE_ICO_ARROW_RIGHT),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  AutoScrollBanner(bannerList: bannerList),
-                  const SizedBox(
-                    height: 46,
-                  ),
-                  InkWell(
-                    onTap: () {
-                      _launchURL(MAIN_RESERVATION_SERVICE_TERMS_URL);
-                    },
-                    child: const NotoSansText(
-                      text: MAIN_RESERVATION_SERVICE_TERMS_TITLE,
-                      isHaveUnderline: true,
-                      textSize: 12,
-                      textColor: clr_666666,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Container(
-                    color: clr_f8f8f8,
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 20),
-                    child: const NotoSansText(
-                      text: MAIN_SELLER_GUIDE,
-                      textSize: 11,
-                      textColor: clr_888888,
-                      lineHeight: 14,
-                      textAlign: TextAlign.center,
-                    ),
-                  )
-                ]),
+          if (snapshot.hasData) {
+            var result = snapshot.data as BaseResponse;
+            handleMainResult(context, result);
+          }
+          return SingleChildScrollView(
+            child: Column(children: [
+              const MainHeader(),
+              const SizedBox(
+                height: 16,
               ),
-            ),
+              const StationBar(),
+              const SizedBox(
+                height: 20,
+              ),
+              const RecentReservation(),
+              const SizedBox(
+                height: 20,
+              ),
+              SelectTrainCondition(
+                  title: MAIN_SELECT_DATE_TITLE,
+                  defaultData: getDataForTrain(DateTime.now())),
+              const SizedBox(
+                height: 12,
+              ),
+              const SelectTrainCondition(
+                  title: MAIN_SELECT_PEOPLE_TITLE,
+                  defaultData: MAIN_DEFAULT_PEOPLE),
+              const SizedBox(
+                height: 24,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: CommonButton(
+                    isEnabled: widget.mainViewmodel.isButtonEnabled,
+                    width: double.infinity,
+                    text: MAIN_SEARCH_TRAIN),
+              ),
+              const SizedBox(
+                height: 48,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: InkWell(
+                  onTap: () => _launchURL(noticeMap["linkUrl"]),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Image.asset(AppImages.IMAGE_ICO_BELL),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      NotoSansText(
+                        text: noticeMap["title"],
+                        fontWeight: FontWeight.w500,
+                        textSize: 14,
+                      ),
+                      const Spacer(),
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Image.asset(AppImages.IMAGE_ICO_ARROW_RIGHT),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              AutoScrollBanner(bannerList: bannerList),
+              const SizedBox(
+                height: 46,
+              ),
+              InkWell(
+                onTap: () {
+                  _launchURL(MAIN_RESERVATION_SERVICE_TERMS_URL);
+                },
+                child: const NotoSansText(
+                  text: MAIN_RESERVATION_SERVICE_TERMS_TITLE,
+                  isHaveUnderline: true,
+                  textSize: 12,
+                  textColor: clr_666666,
+                ),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              Container(
+                color: clr_f8f8f8,
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: const NotoSansText(
+                  text: MAIN_SELLER_GUIDE,
+                  textSize: 11,
+                  textColor: clr_888888,
+                  lineHeight: 14,
+                  textAlign: TextAlign.center,
+                ),
+              )
+            ]),
           );
         } else {
           return const CircularProgressIndicator();
@@ -235,7 +224,12 @@ class MainHeader extends StatelessWidget {
             height: 60,
             alignment: Alignment.centerLeft,
             margin: const EdgeInsets.only(top: 21.0, left: 4.00),
-            child: Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO),
+            child: Theme.of(context).brightness == Brightness.dark
+                ? ColorFiltered(
+                    colorFilter:
+                        const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                    child: Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO))
+                : Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO),
           ),
           const Spacer(),
           const HeaderIconWithText(
@@ -271,6 +265,7 @@ class HeaderIconWithText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: EdgeInsets.only(top: 21.0, right: marginRight),
       width: 60,
@@ -288,7 +283,12 @@ class HeaderIconWithText extends StatelessWidget {
                 child: SizedBox(
                   width: 28,
                   height: 28,
-                  child: Image.asset(imgPath),
+                  child: isDark
+                      ? ColorFiltered(
+                          colorFilter: const ColorFilter.mode(
+                              Colors.white, BlendMode.srcIn),
+                          child: Image.asset(imgPath))
+                      : Image.asset(imgPath),
                 ),
               ),
               if (isNew)
@@ -308,6 +308,7 @@ class HeaderIconWithText extends StatelessWidget {
         NotoSansText(
           text: title,
           textSize: 12,
+          textColor: Theme.of(context).colorScheme.onPrimary,
           fontWeight: FontWeight.bold,
         )
       ]),
@@ -334,7 +335,7 @@ class _StationBarState extends State<StationBar> {
       width: double.infinity,
       height: 102,
       decoration: BoxDecoration(
-        color: clr_3d4964,
+        color: Theme.of(context).colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -348,10 +349,14 @@ class _StationBarState extends State<StationBar> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const NotoSansText(
+                    NotoSansText(
                       text: MAIN_START_STATION,
-                      textColor: clr_bbbbbb,
+                      textColor:
+                          Theme.of(context).colorScheme.onPrimaryContainer,
                       textSize: 13,
+                    ),
+                    SizedBox(
+                      height: 6,
                     ),
                     NotoSansText(
                       text: startStation,
@@ -386,10 +391,13 @@ class _StationBarState extends State<StationBar> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const NotoSansText(
+                  NotoSansText(
                     text: MAIN_FINISH_STATION,
-                    textColor: clr_bbbbbb,
+                    textColor: Theme.of(context).colorScheme.onPrimaryContainer,
                     textSize: 13,
+                  ),
+                  SizedBox(
+                    height: 6,
                   ),
                   NotoSansText(
                     text: finishStation,
@@ -412,7 +420,7 @@ class _StationBarState extends State<StationBar> {
       "startStation": startStation,
       "finishStation": finishStation
     };
-    var result = await context.push(getRoutePath([ROUTER_SELECT_STATION_PATH]),
+    var result = await context.push(getRoutePath([ROUTER_MAIN_PATH,ROUTER_SELECT_STATION_PATH]),
         extra: extras) as Map<String, dynamic>?;
     if (result == null) {
       return;
@@ -422,9 +430,9 @@ class _StationBarState extends State<StationBar> {
       finishStation = result[SELECT_STATION_FINISH];
     });
     if (mounted) {
-      Provider.of<MainNotifier>(context, listen: false)
+      Provider.of<MainViewModel>(context, listen: false)
           .setStartPlace(startStation);
-      Provider.of<MainNotifier>(context, listen: false)
+      Provider.of<MainViewModel>(context, listen: false)
           .setFinishPlace(finishStation);
     }
   }
@@ -439,11 +447,11 @@ class RecentReservation extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 24),
       child: Column(children: [
-        const Align(
+        Align(
             alignment: Alignment.centerLeft,
             child: NotoSansText(
                 text: MAIN_RECENT_RESERVATION_TITLE,
-                textColor: clr_888888,
+                textColor: Theme.of(context).colorScheme.onSecondary,
                 textSize: 14)),
         const SizedBox(height: 8),
         SizedBox(
@@ -472,13 +480,13 @@ class RecentReservationItem extends StatelessWidget {
       height: 38,
       padding: const EdgeInsets.only(left: 14, right: 13),
       margin: const EdgeInsets.only(right: 6),
-      color: clr_eff0f5,
-      child: const Center(
+      color: Theme.of(context).colorScheme.secondaryContainer,
+      child: Center(
           child: NotoSansText(
         text: "수서 -> 동탄",
         textSize: 14,
         fontWeight: FontWeight.w500,
-        textColor: clr_494f60,
+        textColor: Theme.of(context).colorScheme.onSecondaryContainer,
       )),
     );
   }
@@ -521,7 +529,7 @@ class _SelectTrainConditionState extends State<SelectTrainCondition> {
                 text = getDataForTrain(selectedDay!);
               });
               if (mounted) {
-                Provider.of<MainNotifier>(context, listen: false)
+                Provider.of<MainViewModel>(context, listen: false)
                     .setSelectedDay(selectedDay!);
               }
             }
@@ -533,7 +541,7 @@ class _SelectTrainConditionState extends State<SelectTrainCondition> {
                 text = people;
               });
               if (mounted) {
-                Provider.of<MainNotifier>(context, listen: false)
+                Provider.of<MainViewModel>(context, listen: false)
                     .setSelectedPeople(people);
               }
             }
@@ -604,7 +612,7 @@ class _AutoScrollBannerState extends State<AutoScrollBanner> {
         setState(() {
           _currentPage = nextPage;
         });
-        print("현재 페이지: $_currentPage");
+        MyLogger().d("현재 페이지: $_currentPage");
       }
     });
   }

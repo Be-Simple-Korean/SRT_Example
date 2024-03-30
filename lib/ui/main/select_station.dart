@@ -8,8 +8,8 @@ import 'package:srt_ljh/common/colors.dart';
 import 'package:srt_ljh/common/images.dart';
 import 'package:srt_ljh/common/strings.dart';
 import 'package:srt_ljh/ui/main/select_station_provider.dart';
-import 'package:srt_ljh/ui/widget/common_button.dart';
-import 'package:srt_ljh/ui/widget/common_dialog.dart';
+import 'package:srt_ljh/ui/widget/custom_button.dart';
+import 'package:srt_ljh/ui/widget/custom_dialog.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
 
 /**
@@ -429,7 +429,7 @@ class _SelectStationGridViewState extends State<SelectStationGridView> {
                                 context,
                                 SELECT_STATION_SELECT_ERROR_MESSAGE,
                                 "",
-                                BUTTON_CONFIRM);
+                                ALL_CONFIRM);
                           }
                           return;
                         }

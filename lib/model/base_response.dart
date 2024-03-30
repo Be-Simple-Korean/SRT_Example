@@ -1,9 +1,9 @@
-class LoginResponse {
+class BaseResponse {
   final int code;
   final String message;
-  final Map<String, dynamic> data;
+  final Map<String, dynamic>? data;
 
-  LoginResponse({
+  BaseResponse({
     required this.code,
     required this.message,
     required this.data,

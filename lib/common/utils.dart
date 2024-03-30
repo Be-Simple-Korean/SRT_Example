@@ -17,7 +17,7 @@ class PasswordInputFormatter extends TextInputFormatter {
       if (lastStr != "●") {
         _realText += lastStr;
       } else {
-        _realText.substring(0, _realText.length - 1);
+        _realText = _realText.substring(0, _realText.length - 1);
       }
     }
     return TextEditingValue(
@@ -41,7 +41,14 @@ class PasswordInputFormatter extends TextInputFormatter {
 String getRoutePath(List<String> paths) {
   String result = "";
   for (String path in paths) {
-    result += ("/$path");
+    if (paths.length == 1 && path.startsWith("/")) {
+      return path;
+    }
+    if (path.startsWith("/")) {
+      result += (path);
+    } else {
+      result += ("/$path");
+    }
   }
   return result;
 }

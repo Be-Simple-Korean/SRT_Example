@@ -1,6 +1,7 @@
 class AppImages {
   static const IMAGE_ICO_ALARM = "assets/images/ico_alarm.png";
   static const IMAGE_ICO_DELETE = "assets/images/ico_delete.png";
+  static const IMAGE_ICO_DELETE_DARK = "assets/images/ico_delete_dark.png";
   static const IMAGE_ICO_LOGIN_CHECKED_Y = "assets/images/ico_login_checked_y.png";
   static const IMAGE_ICO_LOGIN_CHECKED = "assets/images/ico_login_checked.png";
   static const IMAGE_ICO_TICKET = "assets/images/ico_ticket.png";

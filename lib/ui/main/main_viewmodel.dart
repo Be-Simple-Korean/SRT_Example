@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:srt_ljh/common/strings.dart';
+import 'package:srt_ljh/model/base_response.dart';
+import 'package:srt_ljh/network/api_result.dart';
+import 'package:srt_ljh/network/srt_repository.dart';
 
-/// 예매에 필요한 정보 저장
-class MainNotifier extends ChangeNotifier {
+class MainViewModel with ChangeNotifier {
+  final SrtRepositroy repository;
+
+  ApiResult<BaseResponse>? loginResult;
+
+  ApiResult<BaseResponse>? get getLoginResult => loginResult;
+
+  MainViewModel(this.repository);
+
   String _startPlace = SELECT_STATION_DEFAULT;
   String _finishPlace = SELECT_STATION_DEFAULT;
   DateTime _selecteDay = DateTime.now();
@@ -14,6 +24,7 @@ class MainNotifier extends ChangeNotifier {
   DateTime get getSelectedDay => _selecteDay;
   String get getSelectedPeople => _selectedPeople;
   bool get isButtonEnabled => _isButtonEnabled;
+  
   void setStartPlace(String start) {
     _startPlace = start;
   }
@@ -39,5 +50,10 @@ class MainNotifier extends ChangeNotifier {
       _isButtonEnabled = true;
       notifyListeners();
     }
+  }
+  
+  Future<BaseResponse?> requestSrtInfo() async {
+    loginResult = await repository.requestSrtInfo();
+    return loginResult?.data;
   }
 }

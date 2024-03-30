@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:srt_ljh/common/colors.dart';
 import 'package:srt_ljh/common/Constants.dart';
 import 'package:srt_ljh/common/strings.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
@@ -16,11 +15,11 @@ class AuthTitleBar extends StatelessWidget {
       height: 56,
       child: Stack(
         children: <Widget>[
-          const Align(
+          Align(
               alignment: Alignment.center,
               child: NotoSansText(
                 text: REGISTER_TITLE,
-                textColor: Colors.black,
+                textColor: Theme.of(context).colorScheme.onPrimary,
                 textSize: 20,
               )),
           Align(
@@ -29,9 +28,12 @@ class AuthTitleBar extends StatelessWidget {
               onTap: () {
                 context.pop();
               },
-              child: const Padding(
-                padding: EdgeInsets.only(right: 23.4),
-                child: Icon(Icons.close, color: Colors.black),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 23.4),
+                child: Icon(
+                  Icons.close,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
               ),
             ),
           ),
@@ -43,14 +45,16 @@ class AuthTitleBar extends StatelessWidget {
 
 /// 회원가입 공통 텍스트 필드
 class AuthTextField extends StatefulWidget {
-  AuthTextField(
+  const AuthTextField(
       {super.key,
       required this.title,
       required this.hint,
       this.text = "",
       this.authType = InputAuthType.NORMAL,
       this.controller,
-      this.getValue});
+      this.getValue,
+      this.focusNode,
+      this.getOnChanged});
 
   final String text;
   final String title;
@@ -58,6 +62,8 @@ class AuthTextField extends StatefulWidget {
   final InputAuthType authType;
   final TextEditingController? controller;
   final Function(String)? getValue;
+  final Function(String)? getOnChanged;
+  final FocusNode? focusNode;
   @override
   State<AuthTextField> createState() => _AuthTextFieldState();
 }
@@ -105,8 +111,10 @@ class _AuthTextFieldState extends State<AuthTextField> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(
         widget.title,
-        style: const TextStyle(
-            fontFamily: FONT_NOTOSANS, fontSize: 14, color: clr_888888),
+        style: TextStyle(
+            fontFamily: FONT_NOTOSANS,
+            fontSize: 14,
+            color: Theme.of(context).colorScheme.onSecondary),
       ),
       const SizedBox(height: 6),
       Focus(
@@ -114,19 +122,26 @@ class _AuthTextFieldState extends State<AuthTextField> {
           if (!hasFocuse) {widget.getValue?.call(widget.controller?.text ?? "")}
         },
         child: TextField(
+          focusNode: widget.focusNode,
+          onChanged: (value) {
+            widget.getOnChanged?.call(value);
+          },
           keyboardType: keyboardType,
           readOnly: isReadOnly,
           enabled: isEnabled,
           controller: _controller,
-          style: const TextStyle(
-              color: clr_888888, fontFamily: FONT_NOTOSANS, fontSize: 22),
+          style: TextStyle(
+              decorationThickness: 0,
+              color: Theme.of(context).focusColor,
+              fontFamily: FONT_NOTOSANS,
+              fontSize: 22),
           decoration: InputDecoration(
             isDense: true,
             contentPadding: EdgeInsets.zero,
             hintText: widget.hint,
-            hintStyle: const TextStyle(
+            hintStyle: TextStyle(
                 fontFamily: FONT_NOTOSANS,
-                color: clr_cccccc,
+                color: Theme.of(context).hintColor,
                 fontSize: 22,
                 fontWeight: FontWeight.normal),
             border: InputBorder.none,
@@ -137,7 +152,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
       Container(
         width: double.infinity,
         height: 1.0,
-        color: clr_eeeeee,
+        color: Theme.of(context).hintColor,
       )
     ]);
   }

@@ -4,15 +4,15 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:srt_ljh/common/colors.dart';
 import 'package:srt_ljh/common/constants.dart';
+import 'package:srt_ljh/common/my_logger.dart';
 import 'package:srt_ljh/common/strings.dart';
 import 'package:srt_ljh/ui/dialog/select_time_provider.dart';
-import 'package:srt_ljh/ui/widget/common_button.dart';
+import 'package:srt_ljh/ui/widget/custom_button.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 /// 팝업 노출
-Future<DateTime?> showSelectDateDialog(
-    BuildContext context, DateTime selectedDay) async {
+Future<DateTime?> showSelectDateDialog(BuildContext context, DateTime selectedDay) async {
   await initializeDateFormatting();
   if (context.mounted) {
     return showDialog<DateTime?>(
@@ -41,10 +41,10 @@ Future<DateTime?> showSelectDateDialog(
                     ),
                     child: Column(children: [
                       Padding(
-                        padding: EdgeInsets.only(left: 24, right: 19, top: 23),
+                        padding: const EdgeInsets.only(left: 24, right: 19, top: 23),
                         child: Row(
                           children: [
-                            NotoSansText(
+                            const NotoSansText(
                               text: SELECT_DATE_TITLE,
                               textSize: 18,
                               fontWeight: FontWeight.w500,
@@ -54,7 +54,7 @@ Future<DateTime?> showSelectDateDialog(
                               onTap: () {
                                 context.pop();
                               },
-                              child: SizedBox(
+                              child: const SizedBox(
                                   width: 24,
                                   height: 24,
                                   child:
@@ -147,12 +147,12 @@ class SelectDate extends StatefulWidget {
   final Function(DateTime) callback;
   final DateTime selectedDay;
   @override
-  State<SelectDate> createState() => _MyWidgetState();
+  State<SelectDate> createState() => SelectDateState();
 }
 
-class _MyWidgetState extends State<SelectDate> {
+/// 달력
+class SelectDateState extends State<SelectDate> {
   late DateTime _selectedDay;
-
   @override
   void initState() {
     super.initState();
@@ -161,6 +161,7 @@ class _MyWidgetState extends State<SelectDate> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Container(
       height: 313,
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -203,8 +204,8 @@ class _MyWidgetState extends State<SelectDate> {
             _selectedDay = selectedDay;
           });
           widget.callback(_selectedDay);
-          print(
-              "select - ${_selectedDay.year}.${_selectedDay.month}.${_selectedDay}.day");
+          MyLogger().d(
+              "select - ${_selectedDay.year}.${_selectedDay.month}.$_selectedDay.day");
         },
         enabledDayPredicate: (day) {
           return !isBeforeToday(day);
@@ -220,6 +221,7 @@ class _MyWidgetState extends State<SelectDate> {
   }
 }
 
+/// 시간 선택 아이템
 class SelectTimeItem extends StatelessWidget {
   const SelectTimeItem(
       {super.key, required this.index, required this.callback});

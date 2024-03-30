@@ -1,12 +1,11 @@
 const ROUTER_ROOT_PATH = '/';
 const ROUTER_REGISTER_AUTH_PATH = 'register_auth';
 const ROUTER_REGISTER_PATH = 'register';
-const ROUTER_MAIN_PATH = 'main';
+const ROUTER_MAIN_PATH = '/main';
 const ROUTER_SELECT_STATION_PATH = 'select_station';
 
 const ALL_SELECT_ALL = "선택완료";
-// common_dialog.dart
-const BUTTON_CONFIRM = "확인";
+const ALL_CONFIRM = "확인";
 
 // login.dart
 const LOGIN_TEXT_FIELD_TITLE_ID = "ID";
