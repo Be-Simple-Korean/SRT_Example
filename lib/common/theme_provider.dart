@@ -6,6 +6,7 @@ class ThemeProvider with ChangeNotifier, WidgetsBindingObserver {
       brightness: Brightness.light,
       scaffoldBackgroundColor: Colors.white,
       dividerColor: clr_eeeeee,
+      drawerTheme: const DrawerThemeData(backgroundColor: clr_eff0f5),
       colorScheme: const ColorScheme(
           brightness: Brightness.light,
           primary: Colors.white,
@@ -18,6 +19,7 @@ class ThemeProvider with ChangeNotifier, WidgetsBindingObserver {
           onBackground: Colors.black,
           surface: Colors.white,
           onSurface: Colors.black,
+          surfaceTint: Colors.white,
           secondary: clr_eeeeee,
           onSecondary: clr_888888,
           secondaryContainer: clr_eff0f5,
@@ -27,6 +29,7 @@ class ThemeProvider with ChangeNotifier, WidgetsBindingObserver {
       focusColor: clr_888888);
 
   ThemeData darkThemeData = ThemeData(
+      drawerTheme: const DrawerThemeData(backgroundColor: clr_323741),
       dialogTheme: const DialogTheme(backgroundColor: clr_292f3a),
       dividerColor: clr_494c5a,
       brightness: Brightness.dark,
@@ -45,6 +48,7 @@ class ThemeProvider with ChangeNotifier, WidgetsBindingObserver {
           onBackground: Colors.white,
           surface: clr_313740,
           onSurface: clr_dedede,
+          surfaceTint: clr_1b1d23,
           secondary: clr_434654,
           onSecondary: clr_727b90,
           onSecondaryContainer: clr_dedede,

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
-import 'package:logger/web.dart';
 import 'package:provider/provider.dart';
 import 'package:srt_ljh/common/images.dart';
 import 'package:srt_ljh/common/my_logger.dart';
 import 'package:srt_ljh/common/strings.dart';
 import 'package:srt_ljh/common/Constants.dart';
 import 'package:srt_ljh/common/colors.dart';
-import 'package:srt_ljh/common/utils.dart';
 import 'package:srt_ljh/model/base_response.dart';
 import 'package:srt_ljh/ui/register/reigster_input_viewmodel.dart';
 import 'package:srt_ljh/ui/widget/custom_button.dart';

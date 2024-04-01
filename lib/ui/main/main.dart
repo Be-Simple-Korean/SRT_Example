@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +18,8 @@ import 'package:srt_ljh/ui/widget/custom_dialog.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+enum ThemeMode { SYSTEM, LIGHT, DARK }
+
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
@@ -27,9 +28,8 @@ class MainScreen extends StatelessWidget {
     final mainViewmodel = Provider.of<MainViewModel>(context, listen: false);
 
     return SafeArea(
-        child: Scaffold(
-      body: Main(mainViewmodel: mainViewmodel),
-    ));
+      child: Main(mainViewmodel: mainViewmodel),
+    );
   }
 }
 
@@ -48,10 +48,13 @@ class _MainScreenState extends State<Main> {
   late Future<void> myFuture;
   Map<String, dynamic> noticeMap = {};
   List<dynamic> bannerList = [];
+  late GlobalKey<ScaffoldState> scaffoldKey;
+  ThemeMode currentMode = ThemeMode.DARK;
 
   @override
   void initState() {
     myFuture = widget.mainViewmodel.requestSrtInfo();
+    scaffoldKey = GlobalKey<ScaffoldState>();
     super.initState();
   }
 
@@ -92,8 +95,7 @@ class _MainScreenState extends State<Main> {
   @override
   Widget build(BuildContext context) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return SafeArea(
-        child: FutureBuilder(
+    return FutureBuilder(
       future: myFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
@@ -101,135 +103,287 @@ class _MainScreenState extends State<Main> {
             var result = snapshot.data as BaseResponse;
             handleMainResult(context, result);
           }
-          return SingleChildScrollView(
-            child: Column(children: [
-              const MainHeader(),
-              const SizedBox(
-                height: 16,
+          var selectDecoration = BoxDecoration(
+              color: clr_313740,
+              borderRadius: BorderRadius.circular(11),
+              border: Border.all(width: 1.0, color: clr_434654));
+          return Scaffold(
+            key: scaffoldKey,
+            drawer: Drawer(
+              width: 250,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 73, left: 28,bottom: 40,right: 25),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 135,
+                      height: 22,
+                      child: Theme.of(context).brightness == Brightness.dark
+                          ? ColorFiltered(
+                              colorFilter: const ColorFilter.mode(
+                                  Colors.white, BlendMode.srcIn),
+                              child: Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO))
+                          : Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    NotoSansText(
+                      text: "다크모드",
+                      fontWeight: FontWeight.w500,
+                      textColor: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Container(
+                        width: 194,
+                        height: 41,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Theme.of(context).colorScheme.surfaceTint,
+                            border: Border.all(
+                                width: isDark ? 1.0 : 0.0, color: clr_434654)),
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              flex: 1,
+                              child: InkWell(
+                                  onTap: () {
+                                    if (currentMode != ThemeMode.SYSTEM) {
+                                      setState(() {
+                                        currentMode = ThemeMode.SYSTEM;
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.symmetric(
+                                        horizontal: 4, vertical: 3),
+                                    decoration: currentMode == ThemeMode.SYSTEM
+                                        ? selectDecoration
+                                        : null,
+                                    alignment: Alignment.center,
+                                    child: NotoSansText(
+                                      text: "시스템",
+                                      textColor: Colors.white,
+                                    ),
+                                  )),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: InkWell(
+                                  onTap: () {
+                                    if (currentMode != ThemeMode.LIGHT) {
+                                      setState(() {
+                                        currentMode = ThemeMode.LIGHT;
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    decoration: currentMode == ThemeMode.LIGHT
+                                        ? selectDecoration
+                                        : null,
+                                    margin: EdgeInsets.symmetric(
+                                        horizontal: 4, vertical: 3),
+                                    alignment: Alignment.center,
+                                    child: NotoSansText(
+                                      text: "라이트",
+                                      textColor: Colors.white,
+                                    ),
+                                  )),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: InkWell(
+                                onTap: () {
+                                  if (currentMode != ThemeMode.DARK) {
+                                    setState(() {
+                                      currentMode = ThemeMode.DARK;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  decoration: currentMode == ThemeMode.DARK
+                                      ? selectDecoration
+                                      : null,
+                                  margin: EdgeInsets.symmetric(
+                                      horizontal: 4, vertical: 3),
+                                  alignment: Alignment.center,
+                                  child: NotoSansText(
+                                    text: "다크",
+                                    textColor: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )),
+                    const Expanded(
+                        child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: NotoSansText(
+                              text: "로그아웃",
+                              textColor: clr_727b90,
+                              fontWeight: FontWeight.w500,
+                              textSize: 20,
+                            )))
+                  ],
+                ),
               ),
-              const StationBar(),
-              const SizedBox(
-                height: 20,
-              ),
-              const RecentReservation(),
-              const SizedBox(
-                height: 20,
-              ),
-              SelectTrainCondition(
-                  title: MAIN_SELECT_DATE_TITLE,
-                  defaultData: getDataForTrain(DateTime.now())),
-              const SizedBox(
-                height: 12,
-              ),
-              const SelectTrainCondition(
-                  title: MAIN_SELECT_PEOPLE_TITLE,
-                  defaultData: MAIN_DEFAULT_PEOPLE),
-              const SizedBox(
-                height: 24,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: CommonButton(
-                    isEnabled: widget.mainViewmodel.isButtonEnabled,
-                    width: double.infinity,
-                    text: MAIN_SEARCH_TRAIN),
-              ),
-              const SizedBox(
-                height: 48,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: InkWell(
-                  onTap: () => _launchURL(noticeMap["linkUrl"]),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Image.asset(AppImages.IMAGE_ICO_BELL),
-                      ),
-                      const SizedBox(
-                        width: 8,
-                      ),
-                      NotoSansText(
-                        text: noticeMap["title"],
-                        fontWeight: FontWeight.w500,
-                        textSize: 14,
-                      ),
-                      const Spacer(),
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Image.asset(AppImages.IMAGE_ICO_ARROW_RIGHT),
-                      ),
-                    ],
+            ),
+            body: SingleChildScrollView(
+              child: Column(children: [
+                MainHeader(
+                  callback: () {
+                    scaffoldKey.currentState?.openDrawer();
+                  },
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                const StationBar(),
+                const SizedBox(
+                  height: 20,
+                ),
+                const RecentReservation(),
+                const SizedBox(
+                  height: 20,
+                ),
+                SelectTrainCondition(
+                    title: MAIN_SELECT_DATE_TITLE,
+                    defaultData: getDataForTrain(DateTime.now())),
+                const SizedBox(
+                  height: 12,
+                ),
+                const SelectTrainCondition(
+                    title: MAIN_SELECT_PEOPLE_TITLE,
+                    defaultData: MAIN_DEFAULT_PEOPLE),
+                const SizedBox(
+                  height: 24,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: CommonButton(
+                      isEnabled: widget.mainViewmodel.isButtonEnabled,
+                      width: double.infinity,
+                      text: MAIN_SEARCH_TRAIN),
+                ),
+                const SizedBox(
+                  height: 48,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: InkWell(
+                    onTap: () => _launchURL(noticeMap["linkUrl"]),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: isDark
+                              ? ColorFiltered(
+                                  colorFilter: const ColorFilter.mode(
+                                      Colors.white, BlendMode.srcIn),
+                                  child: Image.asset(AppImages.IMAGE_ICO_BELL))
+                              : Image.asset(AppImages.IMAGE_ICO_BELL),
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        NotoSansText(
+                          text: noticeMap["title"],
+                          fontWeight: FontWeight.w500,
+                          textColor: Theme.of(context).colorScheme.onSurface,
+                          textSize: 14,
+                        ),
+                        const Spacer(),
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: isDark
+                              ? ColorFiltered(
+                                  colorFilter: const ColorFilter.mode(
+                                      Colors.white, BlendMode.srcIn),
+                                  child: Image.asset(
+                                      AppImages.IMAGE_ICO_ARROW_RIGHT))
+                              : Image.asset(AppImages.IMAGE_ICO_ARROW_RIGHT),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              AutoScrollBanner(bannerList: bannerList),
-              const SizedBox(
-                height: 46,
-              ),
-              InkWell(
-                onTap: () {
-                  _launchURL(MAIN_RESERVATION_SERVICE_TERMS_URL);
-                },
-                child: const NotoSansText(
-                  text: MAIN_RESERVATION_SERVICE_TERMS_TITLE,
-                  isHaveUnderline: true,
-                  textSize: 12,
-                  textColor: clr_666666,
+                const SizedBox(
+                  height: 16,
                 ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Container(
-                color: clr_f8f8f8,
-                width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                child: const NotoSansText(
-                  text: MAIN_SELLER_GUIDE,
-                  textSize: 11,
-                  textColor: clr_888888,
-                  lineHeight: 14,
-                  textAlign: TextAlign.center,
+                AutoScrollBanner(bannerList: bannerList),
+                const SizedBox(
+                  height: 46,
                 ),
-              )
-            ]),
+                InkWell(
+                  onTap: () {
+                    _launchURL(MAIN_RESERVATION_SERVICE_TERMS_URL);
+                  },
+                  child: const NotoSansText(
+                    text: MAIN_RESERVATION_SERVICE_TERMS_TITLE,
+                    isHaveUnderline: true,
+                    textSize: 12,
+                    textColor: clr_666666,
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Container(
+                  color: clr_f8f8f8,
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  child: const NotoSansText(
+                    text: MAIN_SELLER_GUIDE,
+                    textSize: 11,
+                    textColor: clr_888888,
+                    lineHeight: 14,
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              ]),
+            ),
           );
         } else {
           return const CircularProgressIndicator();
         }
       },
-    ));
+    );
   }
 }
 
 /// 메인화면 헤더
 class MainHeader extends StatelessWidget {
-  const MainHeader({super.key});
+  const MainHeader({super.key, required this.callback});
 
+  final Function() callback;
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          Container(
-            height: 60,
-            alignment: Alignment.centerLeft,
-            margin: const EdgeInsets.only(top: 21.0, left: 4.00),
-            child: Theme.of(context).brightness == Brightness.dark
-                ? ColorFiltered(
-                    colorFilter:
-                        const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                    child: Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO))
-                : Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO),
+          InkWell(
+            onTap: () {
+              callback.call();
+            },
+            child: Container(
+              height: 60,
+              alignment: Alignment.centerLeft,
+              margin: const EdgeInsets.only(top: 21.0, left: 4.00),
+              child: Theme.of(context).brightness == Brightness.dark
+                  ? ColorFiltered(
+                      colorFilter:
+                          const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                      child: Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO))
+                  : Image.asset(AppImages.IMAGE_IMG_MAIN_LOGO),
+            ),
           ),
           const Spacer(),
           const HeaderIconWithText(
@@ -337,6 +491,9 @@ class _StationBarState extends State<StationBar> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+            color: clr_434654,
+            width: Theme.of(context).brightness == Brightness.dark ? 1.0 : 0.0),
       ),
       child: Row(
         children: [
@@ -355,7 +512,7 @@ class _StationBarState extends State<StationBar> {
                           Theme.of(context).colorScheme.onPrimaryContainer,
                       textSize: 13,
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 6,
                     ),
                     NotoSansText(
@@ -420,7 +577,8 @@ class _StationBarState extends State<StationBar> {
       "startStation": startStation,
       "finishStation": finishStation
     };
-    var result = await context.push(getRoutePath([ROUTER_MAIN_PATH,ROUTER_SELECT_STATION_PATH]),
+    var result = await context.push(
+        getRoutePath([ROUTER_MAIN_PATH, ROUTER_SELECT_STATION_PATH]),
         extra: extras) as Map<String, dynamic>?;
     if (result == null) {
       return;
@@ -480,7 +638,12 @@ class RecentReservationItem extends StatelessWidget {
       height: 38,
       padding: const EdgeInsets.only(left: 14, right: 13),
       margin: const EdgeInsets.only(right: 6),
-      color: Theme.of(context).colorScheme.secondaryContainer,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+        border: Border.all(
+            color: clr_434654,
+            width: Theme.of(context).brightness == Brightness.dark ? 1.0 : 0.0),
+      ),
       child: Center(
           child: NotoSansText(
         text: "수서 -> 동탄",
@@ -550,8 +713,9 @@ class _SelectTrainConditionState extends State<SelectTrainCondition> {
         child: Container(
           height: 62,
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: clr_eeeeee, width: 1.0),
+            color: Theme.of(context).colorScheme.surface,
+            border: Border.all(
+                color: Theme.of(context).colorScheme.secondary, width: 1.0),
             borderRadius: BorderRadius.circular(10),
           ),
           padding: const EdgeInsets.only(left: 20, right: 22),
@@ -564,6 +728,7 @@ class _SelectTrainConditionState extends State<SelectTrainCondition> {
             const Spacer(),
             NotoSansText(
               text: isSelectDate ? text : "총 $text",
+              textColor: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w500,
             )
           ]),
@@ -698,21 +863,24 @@ class BannerImageButton extends StatelessWidget {
   final bool isLeft;
   @override
   Widget build(BuildContext context) {
+    var image = Theme.of(context).brightness == Brightness.dark
+        ? ColorFiltered(
+            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            child: Image.asset(isLeft
+                ? AppImages.IMAGE_ARROW_LEFT
+                : AppImages.IMAGE_ARROW_RIGHT))
+        : isLeft
+            ? Image.asset(AppImages.IMAGE_ARROW_LEFT)
+            : Image.asset(AppImages.IMAGE_ARROW_LEFT);
     return Container(
-      width: 24,
-      height: 24,
-      padding: EdgeInsets.only(left: isLeft ? 0 : 10, right: isLeft ? 10 : 0),
-      alignment: isLeft ? Alignment.centerRight : Alignment.centerLeft,
-      decoration: BoxDecoration(
-          color: clr_797979.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(12.0)),
-      child: SizedBox(
-          width: 6,
-          height: 10,
-          child: Image.asset(isLeft
-              ? AppImages.IMAGE_ARROW_LEFT
-              : AppImages.IMAGE_ARROW_RIGHT)),
-    );
+        width: 24,
+        height: 24,
+        padding: EdgeInsets.only(left: isLeft ? 0 : 10, right: isLeft ? 10 : 0),
+        alignment: isLeft ? Alignment.centerRight : Alignment.centerLeft,
+        decoration: BoxDecoration(
+            color: clr_797979.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(12.0)),
+        child: SizedBox(width: 6, height: 10, child: image));
   }
 }
 
