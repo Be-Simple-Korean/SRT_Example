@@ -23,7 +23,13 @@ class ThemeProvider with ChangeNotifier, WidgetsBindingObserver {
           secondary: clr_eeeeee,
           onSecondary: clr_888888,
           secondaryContainer: clr_eff0f5,
-          onSecondaryContainer: clr_494f60),
+          onSecondaryContainer: clr_494f60,
+          onTertiary: clr_bbbbbb,
+          tertiaryContainer: clr_f8f8f8,
+          onTertiaryContainer: Colors.black,
+          tertiary: clr_cccccc,
+          outline: clr_cccccc,
+          outlineVariant:Colors.transparent),
       hintColor: clr_cccccc,
       dialogTheme: const DialogTheme(backgroundColor: Colors.white),
       focusColor: clr_888888);
@@ -52,7 +58,13 @@ class ThemeProvider with ChangeNotifier, WidgetsBindingObserver {
           secondary: clr_434654,
           onSecondary: clr_727b90,
           onSecondaryContainer: clr_dedede,
-          secondaryContainer: clr_313740));
+          secondaryContainer: clr_313740,
+          tertiary: clr_616772,
+          onTertiary: clr_dedede,
+          outline: clr_434654,
+          outlineVariant:clr_313740,
+          onTertiaryContainer: clr_727b90,
+          tertiaryContainer: clr_1b1d23,));
 
   late ThemeMode currentThemeMode;
   ThemeMode get getCurrentThemeMode => currentThemeMode;
@@ -60,13 +72,7 @@ class ThemeProvider with ChangeNotifier, WidgetsBindingObserver {
   /// 생성자 - 시스템 모드를 가져와 설정
   ThemeProvider() {
     WidgetsBinding.instance.addObserver(this);
-    var brightness =
-        WidgetsBinding.instance.platformDispatcher.platformBrightness;
-    if (brightness == Brightness.light) {
-      currentThemeMode = ThemeMode.light;
-    } else {
-      currentThemeMode = ThemeMode.dark;
-    }
+    setSystemMode();
   }
 
   void changeTheme(bool isLight) {
@@ -76,6 +82,35 @@ class ThemeProvider with ChangeNotifier, WidgetsBindingObserver {
       currentThemeMode = ThemeMode.dark;
     }
     notifyListeners();
+  }
+
+  void setLightMode() {
+    currentThemeMode = ThemeMode.light;
+    notifyListeners();
+  }
+
+  void setDarkMode() {
+    currentThemeMode = ThemeMode.dark;
+    notifyListeners();
+  }
+
+  void setSystemMode() {
+    var brightness =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    if (brightness == Brightness.light) {
+      currentThemeMode = ThemeMode.light;
+    } else {
+      currentThemeMode = ThemeMode.dark;
+    }
+    notifyListeners();
+  }
+
+  bool isLightMode() {
+    return currentThemeMode == ThemeMode.light;
+  }
+
+  bool isDarkMode() {
+    return currentThemeMode == ThemeMode.dark;
   }
 
   /// 모드 변경 감지

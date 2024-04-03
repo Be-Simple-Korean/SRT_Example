@@ -8,7 +8,7 @@ import 'package:srt_ljh/ui/widget/custom_button.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
 
 /// 팝업 노출
-Future<String?> showSelectPeopleDialog(BuildContext context,int index) {
+Future<String?> showSelectPeopleDialog(BuildContext context, int index) {
   String selectedPeople = MAIN_DEFAULT_PEOPLE;
   return showDialog<String>(
     barrierColor: Colors.black.withOpacity(0.7),
@@ -30,9 +30,9 @@ Future<String?> showSelectPeopleDialog(BuildContext context,int index) {
               child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.only(top: 23),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).dialogTheme.backgroundColor,
+                    borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(12.0),
                         topRight: Radius.circular(12.0)),
                   ),
@@ -42,21 +42,30 @@ Future<String?> showSelectPeopleDialog(BuildContext context,int index) {
                         height: 36,
                         child: Row(
                           children: [
-                            const Padding(
+                            Padding(
                               padding: EdgeInsets.only(left: 24.0),
                               child: NotoSansText(
                                 text: SELECT_PEOPLE_TITLE,
                                 textSize: 18,
                                 fontWeight: FontWeight.w500,
+                                textColor:
+                                    Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             const Spacer(),
-                            Container(
-                                margin: const EdgeInsets.only(right: 19),
-                                width: 24,
-                                height: 24,
-                                child: const Icon(Icons.close,
-                                    color: Colors.black)),
+                            InkWell(
+                              onTap: () {
+                                context.pop(selectedPeople);
+                              },
+                              child: Container(
+                                  margin: const EdgeInsets.only(right: 19),
+                                  width: 24,
+                                  height: 24,
+                                  child: Icon(Icons.close,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary)),
+                            ),
                           ],
                         ),
                       ),
@@ -124,15 +133,20 @@ class SelectPeopleItem extends StatelessWidget {
           height: 38,
           width: 58,
           decoration: BoxDecoration(
-              color: isSelected ? clr_476eff : Colors.white,
-              border: Border.all(color: clr_dddddd, width: 1.0),
+              color: isSelected
+                  ? clr_476eff
+                  : Theme.of(context).colorScheme.surface,
+              border: Border.all(
+                  color: Theme.of(context).colorScheme.outline, width: 1.0),
               borderRadius: BorderRadius.circular(0)),
           margin: const EdgeInsets.only(right: 8),
           child: Center(
               child: NotoSansText(
             text: "${index + 1}명",
             textSize: 14,
-            textColor: isSelected ? Colors.white : Colors.black,
+            textColor: isSelected
+                ? Colors.white
+                : Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w500,
           )),
         ),

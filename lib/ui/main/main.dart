@@ -8,6 +8,7 @@ import 'package:srt_ljh/common/constants.dart';
 import 'package:srt_ljh/common/images.dart';
 import 'package:srt_ljh/common/my_logger.dart';
 import 'package:srt_ljh/common/strings.dart';
+import 'package:srt_ljh/common/theme_provider.dart';
 import 'package:srt_ljh/common/utils.dart';
 import 'package:srt_ljh/model/base_response.dart';
 import 'package:srt_ljh/ui/dialog/select_date_dialog.dart';
@@ -49,7 +50,7 @@ class _MainScreenState extends State<Main> {
   Map<String, dynamic> noticeMap = {};
   List<dynamic> bannerList = [];
   late GlobalKey<ScaffoldState> scaffoldKey;
-  ThemeMode currentMode = ThemeMode.DARK;
+  ThemeMode currentMode = ThemeMode.SYSTEM;
 
   @override
   void initState() {
@@ -104,15 +105,18 @@ class _MainScreenState extends State<Main> {
             handleMainResult(context, result);
           }
           var selectDecoration = BoxDecoration(
-              color: clr_313740,
+              color: Theme.of(context).colorScheme.secondaryContainer,
               borderRadius: BorderRadius.circular(11),
-              border: Border.all(width: 1.0, color: clr_434654));
+              border: Border.all(
+                  width: isDark ? 1.0 : 0.0,
+                  color: isDark ? clr_434654 : Colors.transparent));
           return Scaffold(
             key: scaffoldKey,
             drawer: Drawer(
               width: 250,
               child: Padding(
-                padding: const EdgeInsets.only(top: 73, left: 28,bottom: 40,right: 25),
+                padding: const EdgeInsets.only(
+                    top: 73, left: 28, bottom: 40, right: 25),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -144,7 +148,10 @@ class _MainScreenState extends State<Main> {
                             borderRadius: BorderRadius.circular(15),
                             color: Theme.of(context).colorScheme.surfaceTint,
                             border: Border.all(
-                                width: isDark ? 1.0 : 0.0, color: clr_434654)),
+                                width: isDark
+                                    ? 1.0
+                                    : 0.0,
+                                color: isDark ? clr_434654 : Colors.transparent)),
                         child: Row(
                           children: <Widget>[
                             Expanded(
@@ -155,19 +162,23 @@ class _MainScreenState extends State<Main> {
                                       setState(() {
                                         currentMode = ThemeMode.SYSTEM;
                                       });
+                                      Provider.of<ThemeProvider>(context,
+                                              listen: false)
+                                          .setSystemMode();
                                     }
                                   },
                                   child: Container(
-                                    margin: EdgeInsets.symmetric(
+                                    margin: const EdgeInsets.symmetric(
                                         horizontal: 4, vertical: 3),
                                     decoration: currentMode == ThemeMode.SYSTEM
                                         ? selectDecoration
                                         : null,
                                     alignment: Alignment.center,
                                     child: NotoSansText(
-                                      text: "시스템",
-                                      textColor: Colors.white,
-                                    ),
+                                        text: "시스템",
+                                        textColor: getDarkModeTextColorInDrawer(
+                                            context,
+                                            currentMode == ThemeMode.SYSTEM)),
                                   )),
                             ),
                             Expanded(
@@ -178,6 +189,9 @@ class _MainScreenState extends State<Main> {
                                       setState(() {
                                         currentMode = ThemeMode.LIGHT;
                                       });
+                                      Provider.of<ThemeProvider>(context,
+                                              listen: false)
+                                          .setLightMode();
                                     }
                                   },
                                   child: Container(
@@ -188,9 +202,10 @@ class _MainScreenState extends State<Main> {
                                         horizontal: 4, vertical: 3),
                                     alignment: Alignment.center,
                                     child: NotoSansText(
-                                      text: "라이트",
-                                      textColor: Colors.white,
-                                    ),
+                                        text: "라이트",
+                                        textColor: getDarkModeTextColorInDrawer(
+                                            context,
+                                            currentMode == ThemeMode.LIGHT)),
                                   )),
                             ),
                             Expanded(
@@ -201,6 +216,9 @@ class _MainScreenState extends State<Main> {
                                     setState(() {
                                       currentMode = ThemeMode.DARK;
                                     });
+                                    Provider.of<ThemeProvider>(context,
+                                            listen: false)
+                                        .setDarkMode();
                                   }
                                 },
                                 child: Container(
@@ -211,9 +229,10 @@ class _MainScreenState extends State<Main> {
                                       horizontal: 4, vertical: 3),
                                   alignment: Alignment.center,
                                   child: NotoSansText(
-                                    text: "다크",
-                                    textColor: Colors.white,
-                                  ),
+                                      text: "다크",
+                                      textColor: getDarkModeTextColorInDrawer(
+                                          context,
+                                          currentMode == ThemeMode.DARK)),
                                 ),
                               ),
                             ),
@@ -355,6 +374,14 @@ class _MainScreenState extends State<Main> {
         }
       },
     );
+  }
+
+  Color getDarkModeTextColorInDrawer(BuildContext context, bool isSelected) {
+    if (isSelected) {
+      return Theme.of(context).colorScheme.onPrimary;
+    } else {
+      return Theme.of(context).colorScheme.tertiary;
+    }
   }
 }
 
@@ -686,7 +713,7 @@ class _SelectTrainConditionState extends State<SelectTrainCondition> {
       child: InkWell(
         onTap: () async {
           if (isSelectDate) {
-            selectedDay = await showSelectDateDialog(context, selectedDay!);
+            selectedDay = await showSelectDateDialog(context, selectedDay ?? DateTime.now());
             if (selectedDay != null) {
               setState(() {
                 text = getDataForTrain(selectedDay!);

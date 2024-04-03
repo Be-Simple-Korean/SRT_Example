@@ -6,13 +6,15 @@ import 'package:srt_ljh/common/colors.dart';
 import 'package:srt_ljh/common/constants.dart';
 import 'package:srt_ljh/common/my_logger.dart';
 import 'package:srt_ljh/common/strings.dart';
+import 'package:srt_ljh/common/theme_provider.dart';
 import 'package:srt_ljh/ui/dialog/select_time_provider.dart';
 import 'package:srt_ljh/ui/widget/custom_button.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 /// 팝업 노출
-Future<DateTime?> showSelectDateDialog(BuildContext context, DateTime selectedDay) async {
+Future<DateTime?> showSelectDateDialog(
+    BuildContext context, DateTime selectedDay) async {
   await initializeDateFormatting();
   if (context.mounted) {
     return showDialog<DateTime?>(
@@ -33,32 +35,38 @@ Future<DateTime?> showSelectDateDialog(BuildContext context, DateTime selectedDa
                   ),
                   insetPadding: const EdgeInsets.all(0),
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).dialogTheme.backgroundColor,
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(12.0),
                           topRight: Radius.circular(12.0)),
                     ),
                     child: Column(children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 24, right: 19, top: 23),
+                        padding:
+                            const EdgeInsets.only(left: 24, right: 19, top: 23),
                         child: Row(
                           children: [
-                            const NotoSansText(
+                            NotoSansText(
                               text: SELECT_DATE_TITLE,
                               textSize: 18,
                               fontWeight: FontWeight.w500,
+                              textColor:
+                                  Theme.of(context).colorScheme.onPrimary,
                             ),
                             Spacer(),
                             InkWell(
                               onTap: () {
                                 context.pop();
                               },
-                              child: const SizedBox(
+                              child: SizedBox(
                                   width: 24,
                                   height: 24,
-                                  child:
-                                      Icon(Icons.close, color: Colors.black)),
+                                  child: Icon(
+                                    Icons.close,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                  )),
                             ),
                           ],
                         ),
@@ -91,6 +99,7 @@ Future<DateTime?> showSelectDateDialog(BuildContext context, DateTime selectedDa
                                   "${value.selectedIndex.toString().padLeft(2, '0')}시 이후 출발",
                               textSize: 14,
                               fontWeight: FontWeight.w500,
+                              textColor: Theme.of(context).colorScheme.onPrimary,
                             ),
                           );
                         },
@@ -161,7 +170,6 @@ class SelectDateState extends State<SelectDate> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Container(
       height: 313,
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -172,7 +180,7 @@ class SelectDateState extends State<SelectDate> {
         lastDay: DateTime.utc(
             DateTime.now().year, DateTime.now().month, DateTime.now().day + 30),
         focusedDay: _selectedDay,
-        headerStyle: const HeaderStyle(
+        headerStyle: HeaderStyle(
           titleCentered: true,
           formatButtonVisible: false,
           rightChevronPadding: EdgeInsets.all(0),
@@ -181,24 +189,36 @@ class SelectDateState extends State<SelectDate> {
           leftChevronPadding: EdgeInsets.all(0),
           titleTextStyle: TextStyle(
               fontSize: 16.0,
-              color: Colors.black,
+              color: Theme.of(context).colorScheme.onPrimary,
               fontFamily: FONT_NOTOSANS,
               fontWeight: FontWeight.w500),
         ),
-        daysOfWeekStyle: const DaysOfWeekStyle(
-          // 요일 텍스트의 스타일을 조절
+        daysOfWeekStyle: DaysOfWeekStyle(
           weekdayStyle: TextStyle(
               fontSize: 13.0, // 글꼴 크기를 조절
               fontWeight: FontWeight.w500,
-              color: Colors.black),
+              color: Theme.of(context).colorScheme.onPrimary),
           weekendStyle: TextStyle(
               fontSize: 13.0, // 글꼴 크기를 조절
               fontWeight: FontWeight.w500,
-              color: Colors.black),
+              color: Theme.of(context).colorScheme.onPrimary),
         ),
         selectedDayPredicate: (day) {
           return isSameDay(day, _selectedDay);
         },
+        calendarStyle: CalendarStyle(
+          todayDecoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Provider.of<ThemeProvider>(context).isDarkMode()
+                  ? clr_5C4E43
+                  : clr_383b5a),
+          selectedDecoration: BoxDecoration(
+            color: Provider.of<ThemeProvider>(context).isDarkMode()
+                  ? clr_656B76
+                  : clr_EDF0F8, 
+            shape: BoxShape.circle,
+          ),
+        ),
         onDaySelected: (selectedDay, focusedDay) {
           setState(() {
             _selectedDay = selectedDay;
@@ -235,10 +255,10 @@ class SelectTimeItem extends StatelessWidget {
       bool isLated = false;
       Color textColor;
       if (index < DateTime.now().hour) {
-        textColor = clr_cccccc;
+        textColor = Provider.of<ThemeProvider>(context).isDarkMode()? clr_6A6F7D: clr_cccccc;
         isLated = true;
       } else {
-        textColor = isSelected ? Colors.white : clr_050f26;
+        textColor = isSelected ? Colors.white : Theme.of(context).colorScheme.onPrimary;
       }
       return InkWell(
         onTap: () {
@@ -251,8 +271,8 @@ class SelectTimeItem extends StatelessWidget {
           height: 38,
           width: 58,
           decoration: BoxDecoration(
-              color: isSelected ? clr_476eff : Colors.white,
-              border: Border.all(color: clr_cccccc, width: 1.0),
+              color: isSelected ? clr_476eff : Theme.of(context).colorScheme.surface,
+              border: Border.all(color: Theme.of(context).colorScheme.outline, width: 1.0),
               borderRadius: BorderRadius.circular(0)),
           margin: const EdgeInsets.only(right: 8),
           child: Center(
