@@ -13,6 +13,8 @@ import 'package:srt_ljh/ui/register/register_auth_viewmodel.dart';
 import 'package:srt_ljh/ui/register/register_input.dart';
 import 'package:srt_ljh/ui/register/register_auth.dart';
 import 'package:srt_ljh/ui/register/reigster_input_viewmodel.dart';
+import 'package:srt_ljh/ui/notification/notification.dart';
+import 'package:srt_ljh/ui/notification/notification_viewmodel.dart';
 
 void main() {
   runApp(const InitApp());
@@ -46,7 +48,7 @@ final GoRouter _router = GoRouter(
         path: ROUTER_ROOT_PATH,
         builder: (BuildContext context, GoRouterState state) {
           return ChangeNotifierProvider(
-            create: (context) => LoginViewModel(SrtRepositroy()),
+            create: (context) => LoginViewModel(SrtRepository()),
             child: const PopScope(canPop: false, child: LoginScreen()),
           );
         },
@@ -57,7 +59,7 @@ final GoRouter _router = GoRouter(
                 return PopScope(
                   canPop: false,
                   child: ChangeNotifierProvider(
-                    create: (context) => RegisterAuthViewModel(SrtRepositroy()),
+                    create: (context) => RegisterAuthViewModel(SrtRepository()),
                     child: const RegisterAuth(),
                   ),
                 );
@@ -71,7 +73,7 @@ final GoRouter _router = GoRouter(
                       canPop: false,
                       child: ChangeNotifierProvider(
                           create: (context) =>
-                              RegisterInputViewModel(SrtRepositroy()),
+                              RegisterInputViewModel(SrtRepository()),
                           child: RegisterInput(email: email)),
                     );
                   },
@@ -81,13 +83,11 @@ final GoRouter _router = GoRouter(
     GoRoute(
         path: ROUTER_MAIN_PATH,
         builder: (context, state) {
-         return PopScope(
-                      canPop: false,
-                      child: ChangeNotifierProvider(
-                          create: (context) =>
-                              MainViewModel(SrtRepositroy()),
-                          child: const MainScreen())
-                    );
+          return PopScope(
+              canPop: false,
+              child: ChangeNotifierProvider(
+                  create: (context) => MainViewModel(SrtRepository()),
+                  child: const MainScreen()));
         },
         routes: [
           GoRoute(
@@ -98,6 +98,16 @@ final GoRouter _router = GoRouter(
                   canPop: false, child: SelectStation(extras: extras));
             },
           ),
+          GoRoute(
+            path: ROUTER_SEARCH_TRAIN,
+            builder: (context, state) {
+              return PopScope(
+                  canPop: false,
+                  child: ChangeNotifierProvider(
+                      create: (context) => SearchTrainViewModel(SrtRepository()),
+                      child: const NotificationScreen()));
+            },
+          )
         ])
   ],
 );

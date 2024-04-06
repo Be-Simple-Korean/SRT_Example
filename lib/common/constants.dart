@@ -10,6 +10,8 @@ const API_SIGN_UP = "/signup";
 const API_LOGIN = "/login";
 // 메인
 const API_SRT_INFO = "/srtInfo";
+// 메인
+const API_SRT_LIST = "/srtList";
 
 const SUCCESS_MESSAGE = "SUCCESS";
 

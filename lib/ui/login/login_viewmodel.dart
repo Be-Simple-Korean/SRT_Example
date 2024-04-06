@@ -5,7 +5,7 @@ import 'package:srt_ljh/network/srt_repository.dart';
 
 class LoginViewModel with ChangeNotifier {
   
-   final SrtRepositroy repository;
+   final SrtRepository repository;
 
   ApiResult<BaseResponse>? loginResult;
 

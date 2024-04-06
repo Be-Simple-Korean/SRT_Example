@@ -1,42 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:srt_ljh/common/strings.dart';
 
-/// 현재의 선택역 위치 상태 - 출발 or 도착, 선택역
 class SelectPlaceNotifier extends ChangeNotifier {
-  PLACE? _place;
-  String _startPlace = SELECT_STATION_DEFAULT;
-  String _finishPlace = SELECT_STATION_DEFAULT;
+  Map<String, dynamic> startInfoMap = {};
+  Map<String, dynamic> finishInfoMap = {};
   int _selectedIndex = -1;
 
-  PLACE? get place => _place;
-  String get startPlace => _startPlace;
-  String get finishPlace => _finishPlace;
   int get selectedIndex => _selectedIndex;
-  
-  SelectPlaceNotifier(this._startPlace,this._finishPlace);
 
-  void setPlace(PLACE place) {
-    _place = place;
-    resetIndex();
+  SelectPlaceNotifier(
+      Map<String, dynamic> startInfoMap, Map<String, dynamic> finishInfoMap) {
+    this.startInfoMap = initStation(startInfoMap);
+    this.finishInfoMap = initStation(finishInfoMap);
   }
 
-  void initStart(String start) {
-    _startPlace = start.isEmpty ? SELECT_STATION_DEFAULT : start;
+  Map<String, dynamic> initStation(Map<String, dynamic>? stationInfo) {
+    if (stationInfo != null) {
+      return stationInfo;
+    } else {
+      return {"stationNm": SELECT_STATION_DEFAULT, "stationId": ""};
+    }
   }
 
-  void initFinish(String finish) {
-    _finishPlace = finish.isEmpty ? SELECT_STATION_DEFAULT : finish;
+  void setStartStation(Map<String, dynamic> stationInfo) {
+    startInfoMap = stationInfo;
   }
 
-  void setStart(String start) {
-    _startPlace = start;
-    notifyListeners();
+  void setFinishStation(Map<String, dynamic> stationInfo) {
+    finishInfoMap = stationInfo;
   }
 
-  void setFinish(String finish) {
-    _finishPlace = finish;
-    notifyListeners();
-  }
+  Map<String, dynamic> get getStartStationInfo => startInfoMap;
+  Map<String, dynamic> get getFinishStationInfo => finishInfoMap;
+  String get getStartStationName => startInfoMap["stationNm"];
+  String get getFinishStationName => finishInfoMap["stationNm"];
 
   void resetIndex() {
     _selectedIndex = -1;
@@ -49,20 +46,18 @@ class SelectPlaceNotifier extends ChangeNotifier {
   }
 
   void swapStation() {
-    String temp = _startPlace;
-    _startPlace = _finishPlace;
-    _finishPlace = temp;
+    Map<String, dynamic> temp = startInfoMap;
+    startInfoMap = finishInfoMap;
+    finishInfoMap = temp;
     notifyListeners();
   }
 
   bool getCheckCompleteStation() {
-    if (_startPlace != SELECT_STATION_DEFAULT &&
-        _finishPlace != SELECT_STATION_DEFAULT) {
+    if ((startInfoMap["stationId"] as String).isNotEmpty &&
+        (finishInfoMap["stationId"] as String).isNotEmpty) {
       return true;
     } else {
       return false;
     }
   }
 }
-
-enum PLACE { START, FINISH }

@@ -4,7 +4,7 @@ import 'package:srt_ljh/network/api_result.dart';
 import 'package:srt_ljh/network/srt_repository.dart';
 
 class RegisterAuthViewModel with ChangeNotifier {
-  final SrtRepositroy repository;
+  final SrtRepository repository;
 
   ApiResult<BaseResponse>? sendAuthCodeResult;
 

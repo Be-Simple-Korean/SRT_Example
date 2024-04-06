@@ -6,15 +6,15 @@ import 'package:srt_ljh/common/my_logger.dart';
 import 'package:srt_ljh/model/base_response.dart';
 import 'package:srt_ljh/network/api_result.dart';
 
-class SrtRepositroy {
+class SrtRepository {
   final dio = Dio();
-  static final SrtRepositroy _instance = SrtRepositroy._internal();
+  static final SrtRepository _instance = SrtRepository._internal();
 
-  factory SrtRepositroy() {
+  factory SrtRepository() {
     return _instance;
   }
 
-  SrtRepositroy._internal() {
+  SrtRepository._internal() {
     dio.options.baseUrl = BASE_URL;
     dio.options.headers = {
       'Content-Type': 'application/json',
@@ -111,6 +111,24 @@ class SrtRepositroy {
   Future<ApiResult<BaseResponse>> requestSrtInfo() async {
     try {
       final response = await dio.post(API_SRT_INFO);
+      if (response.statusCode == 200) {
+        return ApiResult.success(BaseResponse(
+            code: response.data['code'],
+            message: response.data['message'],
+            data: response.data['data']));
+      } else {
+        return ApiResult.error('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      return ApiResult.error(e.toString());
+    }
+  }
+
+  /// srt list api 통신
+  Future<ApiResult<BaseResponse>> requestSrtList(Map<String, dynamic> params) async {
+      String jsonData = jsonEncode(params);
+    try {
+      final response = await dio.post(API_SRT_LIST,data: jsonData);
       if (response.statusCode == 200) {
         return ApiResult.success(BaseResponse(
             code: response.data['code'],

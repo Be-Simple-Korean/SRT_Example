@@ -53,109 +53,109 @@ class _SelectStationState extends State<SelectStation> {
               children: [
                 const Header(),
                 Expanded(
-                  child: SingleChildScrollView(
-                    clipBehavior: Clip.none,
-                    child: Column(children: [
-                      const SizedBox(
-                        height: 16,
+                  child: Stack(children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 64),
+                      child: SingleChildScrollView(
+                        child: Column(children: [
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          StationBar(
+                            selected: _isStart
+                                ? SELECT_STATION_START
+                                : SELECT_STATION_FINISH,
+                            changeState: (isStart) {
+                              _isStart = isStart;
+                              Provider.of<SelectPlaceNotifier>(context,
+                                      listen: false)
+                                  .resetIndex();
+                            },
+                          ),
+                          const SizedBox(
+                            height: 32,
+                          ),
+                          const RecentReservation(),
+                          const SizedBox(
+                            height: 32,
+                          ),
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(left: 24),
+                            child: NotoSansText(
+                              text: SELECT_STATION_LIST_TITLE,
+                              textSize: 22,
+                              fontWeight: FontWeight.w500,
+                              textColor:
+                                  Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 14,
+                          ),
+                          SelectStationGridView(
+                            stationCallback: (station) {
+                              if (_isStart) {
+                                Provider.of<SelectPlaceNotifier>(context,
+                                        listen: false)
+                                    .setStartStation(station);
+                              } else {
+                                Provider.of<SelectPlaceNotifier>(context,
+                                        listen: false)
+                                    .setFinishStation(station);
+                              }
+                              bool isComplete =
+                                  Provider.of<SelectPlaceNotifier>(context,
+                                          listen: false)
+                                      .getCheckCompleteStation();
+                              if (isComplete) {
+                                setState(() {
+                                  isButtonEnabled = true;
+                                });
+                              }
+                            },
+                          ),
+                        ]),
                       ),
-                      StationBar(
-                        selected: _isStart
-                            ? SELECT_STATION_START
-                            : SELECT_STATION_FINISH,
-                        changeState: (isStart) {
-                          _isStart = isStart;
-                          Provider.of<SelectPlaceNotifier>(context,
-                                  listen: false)
-                              .resetIndex();
-                        },
-                      ),
-                      const SizedBox(
-                        height: 32,
-                      ),
-                      const RecentReservation(),
-                      const SizedBox(
-                        height: 32,
-                      ),
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.only(left: 24),
-                        child: NotoSansText(
-                          text: SELECT_STATION_LIST_TITLE,
-                          textSize: 22,
-                          fontWeight: FontWeight.w500,
-                          textColor: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        height: 80,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Provider.of<ThemeProvider>(context, listen: false)
+                                      .isDarkMode()
+                                  ? clr_22242a
+                                  : Colors.white,
+                              Provider.of<ThemeProvider>(context, listen: false)
+                                      .isDarkMode()
+                                  ? clr_22242a.withOpacity(0.01)
+                                  : Colors.white.withOpacity(0.01),
+                            ],
+                            stops: const [0.7, 1.0],
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: CommonButton(
+                            width: double.infinity,
+                            text: SELECT_STATION_COMPLETE,
+                            isEnabled: isButtonEnabled,
+                            callback: () {
+                              context.pop({
+                                SELECT_STATION_START: Provider.of<SelectPlaceNotifier>(context,listen: false).getStartStationInfo,
+                                SELECT_STATION_FINISH: Provider.of<SelectPlaceNotifier>(context,listen: false).getFinishStationInfo
+                              });
+                            },
+                          ),
                         ),
                       ),
-                      const SizedBox(
-                        height: 14,
-                      ),
-                      SelectStationGridView(
-                        stationCallback: (station) {
-                          if (_isStart) {
-                            Provider.of<SelectPlaceNotifier>(context,
-                                    listen: false)
-                                .setStart(station);
-                          } else {
-                            Provider.of<SelectPlaceNotifier>(context,
-                                    listen: false)
-                                .setFinish(station);
-                          }
-                          bool isComplete = Provider.of<SelectPlaceNotifier>(
-                                  context,
-                                  listen: false)
-                              .getCheckCompleteStation();
-                          if (isComplete) {
-                            setState(() {
-                              isButtonEnabled = true;
-                            });
-                          }
-                        },
-                      ),
-                    ]),
-                  ),
-                ),
-                Container(
-                  height: 80,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      colors: [
-                        Provider.of<ThemeProvider>(context, listen: false)
-                                .isDarkMode()
-                            ? clr_22242a
-                            : Colors.white,
-                        Provider.of<ThemeProvider>(context, listen: false)
-                                .isDarkMode()
-                            ? clr_22242a.withOpacity(0.01)
-                            : Colors.white.withOpacity(0.01),
-                      ],
-                      stops: const [0.7, 1.0],
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: CommonButton(
-                      width: double.infinity,
-                      text: SELECT_STATION_COMPLETE,
-                      isEnabled: isButtonEnabled,
-                      callback: () {
-                        String selectedStartStation =
-                            Provider.of<SelectPlaceNotifier>(context,
-                                    listen: false)
-                                .startPlace;
-                        String selectedFinishStation =
-                            Provider.of<SelectPlaceNotifier>(context,
-                                    listen: false)
-                                .finishPlace;
-                        context.pop({
-                          SELECT_STATION_START: selectedStartStation,
-                          SELECT_STATION_FINISH: selectedFinishStation
-                        });
-                      },
-                    ),
-                  ),
+                  ]),
                 ),
               ],
             );
@@ -236,9 +236,9 @@ class _StationBarState extends State<StationBar> {
   @override
   Widget build(BuildContext context) {
     String selectedStartStation =
-        Provider.of<SelectPlaceNotifier>(context).startPlace;
+        Provider.of<SelectPlaceNotifier>(context).getStartStationName;
     String selectedFinishStation =
-        Provider.of<SelectPlaceNotifier>(context).finishPlace;
+        Provider.of<SelectPlaceNotifier>(context).getFinishStationName;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       width: double.infinity,
@@ -408,7 +408,7 @@ class RecentReservationItem extends StatelessWidget {
 class SelectStationGridView extends StatefulWidget {
   const SelectStationGridView({super.key, required this.stationCallback});
 
-  final Function(String) stationCallback;
+  final Function(Map<String, dynamic>) stationCallback;
   @override
   State<SelectStationGridView> createState() => _SelectStationGridViewState();
 }
@@ -456,7 +456,7 @@ class _SelectStationGridViewState extends State<SelectStationGridView> {
                           Provider.of<SelectPlaceNotifier>(context,
                                   listen: false)
                               .selectIndex(index);
-                          widget.stationCallback(station);
+                          widget.stationCallback(data?[index]);
                         }
                       },
                       child: Container(
@@ -503,7 +503,7 @@ class _SelectStationGridViewState extends State<SelectStationGridView> {
 
   Future<bool> getCompareStation(BuildContext context, String station) async {
     String selectedStartStation =
-        Provider.of<SelectPlaceNotifier>(context, listen: false).startPlace;
+        Provider.of<SelectPlaceNotifier>(context, listen: false).getStartStationName;
     if (selectedStartStation == station) {
       return true;
     } else {

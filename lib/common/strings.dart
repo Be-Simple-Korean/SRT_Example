@@ -3,6 +3,7 @@ const ROUTER_REGISTER_AUTH_PATH = 'register_auth';
 const ROUTER_REGISTER_PATH = 'register';
 const ROUTER_MAIN_PATH = '/main';
 const ROUTER_SELECT_STATION_PATH = 'select_station';
+const ROUTER_SEARCH_TRAIN = 'search_train';
 
 const ALL_SELECT_ALL = "선택완료";
 const ALL_CONFIRM = "확인";

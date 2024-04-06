@@ -284,9 +284,12 @@ class _MainScreenState extends State<Main> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: CommonButton(
-                      isEnabled: widget.mainViewmodel.isButtonEnabled,
+                      isEnabled: Provider.of<MainViewModel>(context).isButtonEnabled,
                       width: double.infinity,
-                      text: MAIN_SEARCH_TRAIN),
+                      text: MAIN_SEARCH_TRAIN,
+                      callback: () {
+                        widget.mainViewmodel.requestSrtList();
+                      },),
                 ),
                 const SizedBox(
                   height: 48,
@@ -413,11 +416,16 @@ class MainHeader extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const HeaderIconWithText(
-            isNew: false,
-            imgPath: AppImages.IMAGE_ICO_ALARM,
-            title: MAIN_ARLAM,
-            marginRight: 8.0,
+          InkWell(
+            onTap: () {
+              context.push(getRoutePath([ROUTER_MAIN_PATH,ROUTER_SEARCH_TRAIN]));
+            },
+            child: const HeaderIconWithText(
+              isNew: false,
+              imgPath: AppImages.IMAGE_ICO_ALARM,
+              title: MAIN_ARLAM,
+              marginRight: 8.0,
+            ),
           ),
           const HeaderIconWithText(
               isNew: false,
@@ -506,8 +514,14 @@ class StationBar extends StatefulWidget {
 }
 
 class _StationBarState extends State<StationBar> {
-  String startStation = SELECT_STATION_DEFAULT;
-  String finishStation = SELECT_STATION_DEFAULT;
+ Map<String, dynamic> startStation = {
+    "stationNm": SELECT_STATION_DEFAULT,
+    "stationId": ""
+  };
+ Map<String, dynamic> finishStation = {
+    "stationNm": SELECT_STATION_DEFAULT,
+    "stationId": ""
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -543,7 +557,7 @@ class _StationBarState extends State<StationBar> {
                       height: 6,
                     ),
                     NotoSansText(
-                      text: startStation,
+                      text: startStation["stationNm"],
                       textColor: Colors.white,
                       textSize: 24,
                       fontWeight: FontWeight.bold,
@@ -584,7 +598,7 @@ class _StationBarState extends State<StationBar> {
                     height: 6,
                   ),
                   NotoSansText(
-                    text: finishStation,
+                    text: finishStation["stationNm"],
                     textColor: Colors.white,
                     textSize: 24,
                     fontWeight: FontWeight.bold,
@@ -616,9 +630,9 @@ class _StationBarState extends State<StationBar> {
     });
     if (mounted) {
       Provider.of<MainViewModel>(context, listen: false)
-          .setStartPlace(startStation);
+          .setStartStation(startStation);
       Provider.of<MainViewModel>(context, listen: false)
-          .setFinishPlace(finishStation);
+          .setFinishStation(finishStation);
     }
   }
 }
@@ -714,6 +728,7 @@ class _SelectTrainConditionState extends State<SelectTrainCondition> {
         onTap: () async {
           if (isSelectDate) {
             selectedDay = await showSelectDateDialog(context, selectedDay ?? DateTime.now());
+            
             if (selectedDay != null) {
               setState(() {
                 text = getDataForTrain(selectedDay!);
