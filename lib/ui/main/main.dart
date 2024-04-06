@@ -148,10 +148,9 @@ class _MainScreenState extends State<Main> {
                             borderRadius: BorderRadius.circular(15),
                             color: Theme.of(context).colorScheme.surfaceTint,
                             border: Border.all(
-                                width: isDark
-                                    ? 1.0
-                                    : 0.0,
-                                color: isDark ? clr_434654 : Colors.transparent)),
+                                width: isDark ? 1.0 : 0.0,
+                                color:
+                                    isDark ? clr_434654 : Colors.transparent)),
                         child: Row(
                           children: <Widget>[
                             Expanded(
@@ -284,12 +283,14 @@ class _MainScreenState extends State<Main> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: CommonButton(
-                      isEnabled: Provider.of<MainViewModel>(context).isButtonEnabled,
-                      width: double.infinity,
-                      text: MAIN_SEARCH_TRAIN,
-                      callback: () {
-                        widget.mainViewmodel.requestSrtList();
-                      },),
+                    isEnabled:
+                        Provider.of<MainViewModel>(context).isButtonEnabled,
+                    width: double.infinity,
+                    text: MAIN_SEARCH_TRAIN,
+                    callback: () {
+                      widget.mainViewmodel.requestSrtList();
+                    },
+                  ),
                 ),
                 const SizedBox(
                   height: 48,
@@ -357,14 +358,18 @@ class _MainScreenState extends State<Main> {
                   height: 16,
                 ),
                 Container(
-                  color: clr_f8f8f8,
+                  color: Provider.of<ThemeProvider>(context).isDarkMode()
+                      ? clr_313740
+                      : clr_f8f8f8,
                   width: double.infinity,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  child: const NotoSansText(
+                  child: NotoSansText(
                     text: MAIN_SELLER_GUIDE,
                     textSize: 11,
-                    textColor: clr_888888,
+                    textColor: Provider.of<ThemeProvider>(context).isDarkMode()
+                      ? clr_7B839B
+                      : clr_888888,
                     lineHeight: 14,
                     textAlign: TextAlign.center,
                   ),
@@ -418,7 +423,8 @@ class MainHeader extends StatelessWidget {
           const Spacer(),
           InkWell(
             onTap: () {
-              context.push(getRoutePath([ROUTER_MAIN_PATH,ROUTER_SEARCH_TRAIN]));
+              context
+                  .push(getRoutePath([ROUTER_MAIN_PATH, ROUTER_SEARCH_TRAIN]));
             },
             child: const HeaderIconWithText(
               isNew: false,
@@ -514,11 +520,11 @@ class StationBar extends StatefulWidget {
 }
 
 class _StationBarState extends State<StationBar> {
- Map<String, dynamic> startStation = {
+  Map<String, dynamic> startStation = {
     "stationNm": SELECT_STATION_DEFAULT,
     "stationId": ""
   };
- Map<String, dynamic> finishStation = {
+  Map<String, dynamic> finishStation = {
     "stationNm": SELECT_STATION_DEFAULT,
     "stationId": ""
   };
@@ -727,8 +733,9 @@ class _SelectTrainConditionState extends State<SelectTrainCondition> {
       child: InkWell(
         onTap: () async {
           if (isSelectDate) {
-            selectedDay = await showSelectDateDialog(context, selectedDay ?? DateTime.now());
-            
+            selectedDay = await showSelectDateDialog(
+                context, selectedDay ?? DateTime.now());
+
             if (selectedDay != null) {
               setState(() {
                 text = getDataForTrain(selectedDay!);

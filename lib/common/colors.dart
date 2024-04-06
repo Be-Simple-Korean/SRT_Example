@@ -41,3 +41,4 @@ const Color clr_EDF0F8 = Color(0xFFEDF0F8);
 const Color clr_6A6F7D = Color(0xFF6A6F7D);
 const Color clr_737b93 = Color(0xFF737b93);
 const Color clr_99A0B1 = Color(0xFF99A0B1);
+const Color clr_7B839B = Color(0xFF7B839B);
