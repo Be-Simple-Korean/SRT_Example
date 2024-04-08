@@ -15,4 +15,7 @@ class AppImages {
   static const IMAGE_ICO_CHANGE_DARK = "assets/images/ico_change_dark.png";
   static const IMAGE_ARROW_LEFT = "assets/images/arrow_left.png";
   static const IMAGE_ARROW_RIGHT = "assets/images/arrow_right.png";
+  static const IMAGE_ERROR = "assets/images/ico_error.png";
+  static const IMAGE_ERROR_DARK = "assets/images/ico_error_dark.png";
+  static const IMAGE_ARROW_BLUE = "assets/images/ico_arrow_blue.png";
 }

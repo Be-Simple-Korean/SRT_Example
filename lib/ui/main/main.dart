@@ -11,9 +11,9 @@ import 'package:srt_ljh/common/strings.dart';
 import 'package:srt_ljh/common/theme_provider.dart';
 import 'package:srt_ljh/common/utils.dart';
 import 'package:srt_ljh/model/base_response.dart';
-import 'package:srt_ljh/ui/dialog/select_date_dialog.dart';
-import 'package:srt_ljh/ui/dialog/select_people_dialog.dart';
-import 'package:srt_ljh/ui/main/main_viewmodel.dart';
+import 'package:srt_ljh/ui/main/dialog/select_date_dialog.dart';
+import 'package:srt_ljh/ui/main/dialog/select_people_dialog.dart';
+import 'package:srt_ljh/ui/main/provider/main_viewmodel.dart';
 import 'package:srt_ljh/ui/widget/custom_button.dart';
 import 'package:srt_ljh/ui/widget/custom_dialog.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
@@ -80,6 +80,45 @@ class _MainScreenState extends State<Main> {
         break;
       default:
         CommonDialog.showErrDialog(context, "실패", "", "확인");
+        break;
+    }
+  }
+
+  /// 기차조회 결과 처리
+  Future<void> handleSrtListResult(
+      BuildContext context, BaseResponse result) async {
+    switch (result.code) {
+      case 0:
+        if (result.message == SUCCESS_MESSAGE) {
+          result.data?["startStation"] =
+              widget.mainViewmodel.startInfoMap["stationNm"];
+          result.data?["finishStation"] =
+              widget.mainViewmodel.finishInfoMap["stationNm"];
+          result.data?["selectPeople"] = widget.mainViewmodel.getSelectedPeople;
+          result.data?["selectedDay"] =
+              getDataForTrainUntilWeekDay(widget.mainViewmodel.getSelectedDay);
+          GoRouter.of(context).push(
+              getRoutePath([ROUTER_MAIN_PATH, ROUTER_SEARCH_TRAIN]),
+              extra: result.data);
+        } else {}
+        break;
+      case 10:
+        CommonDialog.showErrDialog(
+            context,
+            "필수 Parameter(depPlaceId, arrPlaceId, depPlandDate, depPlandTime, deviceId)가 없습니다",
+            "",
+            "확인");
+        break;
+      case 20:
+        CommonDialog.showErrDialog(
+            context, "depPlandDate or depPlandTime이 숫자 형식이 아닙니다.", "", "확인");
+        break;
+      case 30:
+        CommonDialog.showErrDialog(
+            context, "depPlandDate or depPlandTime이 사이즈가 다릅니다.", "", "확인");
+        break;
+      case 80:
+        CommonDialog.showErrDialog(context, "기차 조회 오류", "", "확인");
         break;
     }
   }
@@ -270,7 +309,7 @@ class _MainScreenState extends State<Main> {
                 ),
                 SelectTrainCondition(
                     title: MAIN_SELECT_DATE_TITLE,
-                    defaultData: getDataForTrain(DateTime.now())),
+                    defaultData: getDataForTrainUntilHour(DateTime.now())),
                 const SizedBox(
                   height: 12,
                 ),
@@ -287,8 +326,11 @@ class _MainScreenState extends State<Main> {
                         Provider.of<MainViewModel>(context).isButtonEnabled,
                     width: double.infinity,
                     text: MAIN_SEARCH_TRAIN,
-                    callback: () {
-                      widget.mainViewmodel.requestSrtList();
+                    callback: () async {
+                      var result = await widget.mainViewmodel.requestSrtList();
+                      if (result != null && mounted) {
+                        handleSrtListResult(context, result);
+                      }
                     },
                   ),
                 ),
@@ -368,8 +410,8 @@ class _MainScreenState extends State<Main> {
                     text: MAIN_SELLER_GUIDE,
                     textSize: 11,
                     textColor: Provider.of<ThemeProvider>(context).isDarkMode()
-                      ? clr_7B839B
-                      : clr_888888,
+                        ? clr_7B839B
+                        : clr_888888,
                     lineHeight: 14,
                     textAlign: TextAlign.center,
                   ),
@@ -424,7 +466,7 @@ class MainHeader extends StatelessWidget {
           InkWell(
             onTap: () {
               context
-                  .push(getRoutePath([ROUTER_MAIN_PATH, ROUTER_SEARCH_TRAIN]));
+                  .push(getRoutePath([ROUTER_MAIN_PATH, ROUTER_NOTIFICATION]));
             },
             child: const HeaderIconWithText(
               isNew: false,
@@ -738,7 +780,7 @@ class _SelectTrainConditionState extends State<SelectTrainCondition> {
 
             if (selectedDay != null) {
               setState(() {
-                text = getDataForTrain(selectedDay!);
+                text = getDataForTrainUntilHour(selectedDay!);
               });
               if (mounted) {
                 Provider.of<MainViewModel>(context, listen: false)

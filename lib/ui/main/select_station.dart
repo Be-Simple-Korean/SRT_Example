@@ -8,7 +8,7 @@ import 'package:srt_ljh/common/colors.dart';
 import 'package:srt_ljh/common/images.dart';
 import 'package:srt_ljh/common/strings.dart';
 import 'package:srt_ljh/common/theme_provider.dart';
-import 'package:srt_ljh/ui/main/select_station_provider.dart';
+import 'package:srt_ljh/ui/main/provider/select_station_provider.dart';
 import 'package:srt_ljh/ui/widget/custom_button.dart';
 import 'package:srt_ljh/ui/widget/custom_dialog.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';

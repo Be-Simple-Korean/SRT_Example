@@ -7,7 +7,7 @@ import 'package:srt_ljh/common/constants.dart';
 import 'package:srt_ljh/common/my_logger.dart';
 import 'package:srt_ljh/common/strings.dart';
 import 'package:srt_ljh/common/theme_provider.dart';
-import 'package:srt_ljh/ui/dialog/select_time_provider.dart';
+import 'package:srt_ljh/ui/main/provider/select_time_provider.dart';
 import 'package:srt_ljh/ui/widget/custom_button.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
 import 'package:table_calendar/table_calendar.dart';

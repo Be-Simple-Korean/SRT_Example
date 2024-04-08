@@ -6,7 +6,7 @@ import 'package:srt_ljh/common/theme_provider.dart';
 import 'package:srt_ljh/network/srt_repository.dart';
 import 'package:srt_ljh/ui/login/login.dart';
 import 'package:srt_ljh/ui/login/login_viewmodel.dart';
-import 'package:srt_ljh/ui/main/main_viewmodel.dart';
+import 'package:srt_ljh/ui/main/provider/main_viewmodel.dart';
 import 'package:srt_ljh/ui/main/select_station.dart';
 import 'package:srt_ljh/ui/main/main.dart';
 import 'package:srt_ljh/ui/register/register_auth_viewmodel.dart';
@@ -15,6 +15,7 @@ import 'package:srt_ljh/ui/register/register_auth.dart';
 import 'package:srt_ljh/ui/register/reigster_input_viewmodel.dart';
 import 'package:srt_ljh/ui/notification/notification.dart';
 import 'package:srt_ljh/ui/notification/notification_viewmodel.dart';
+import 'package:srt_ljh/ui/search_train/search_train.dart';
 
 void main() {
   runApp(const InitApp());
@@ -99,13 +100,28 @@ final GoRouter _router = GoRouter(
             },
           ),
           GoRoute(
-            path: ROUTER_SEARCH_TRAIN,
+            path: ROUTER_NOTIFICATION,
             builder: (context, state) {
               return PopScope(
                   canPop: false,
                   child: ChangeNotifierProvider(
-                      create: (context) => SearchTrainViewModel(SrtRepository()),
+                      create: (context) =>
+                          SearchTrainViewModel(SrtRepository()),
                       child: const NotificationScreen()));
+            },
+          ),
+          GoRoute(
+            path: ROUTER_SEARCH_TRAIN,
+            builder: (context, state) {
+              var extra = state.extra as Map<String, dynamic>;
+              return PopScope(
+                  canPop: false,
+                  child: ChangeNotifierProvider(
+                      create: (context) =>
+                          SearchTrainViewModel(SrtRepository()),
+                      child: SearchTrain(
+                        result: extra,
+                      )));
             },
           )
         ])

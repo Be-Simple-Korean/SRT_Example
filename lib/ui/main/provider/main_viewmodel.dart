@@ -7,9 +7,9 @@ import 'package:srt_ljh/network/srt_repository.dart';
 class MainViewModel with ChangeNotifier {
   final SrtRepository repository;
 
-  ApiResult<BaseResponse>? loginResult;
+  ApiResult<BaseResponse>? apiResult;
 
-  ApiResult<BaseResponse>? get getLoginResult => loginResult;
+  ApiResult<BaseResponse>? get getLoginResult => apiResult;
 
   MainViewModel(this.repository);
 
@@ -61,8 +61,8 @@ class MainViewModel with ChangeNotifier {
   }
 
   Future<BaseResponse?> requestSrtInfo() async {
-    loginResult = await repository.requestSrtInfo();
-    return loginResult?.data;
+    apiResult = await repository.requestSrtInfo();
+    return apiResult?.data;
   }
 
   Future<BaseResponse?> requestSrtList() async {
@@ -75,7 +75,7 @@ class MainViewModel with ChangeNotifier {
     params["depPlandTime"] = _selectedDay.hour.toString().padLeft(2, '0') +
         _selectedDay.minute.toString().padLeft(2, '0');
 
-    loginResult = await repository.requestSrtList(params);
-    return loginResult?.data;
+    apiResult = await repository.requestSrtList(params);
+    return apiResult?.data;
   }
 }

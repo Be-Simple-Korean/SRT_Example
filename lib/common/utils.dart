@@ -54,7 +54,13 @@ String getRoutePath(List<String> paths) {
 }
 
 /// 기차 조건 선택 날짜 반환
-String getDataForTrain(DateTime dateTime) {
+String getDataForTrainUntilHour(DateTime dateTime) {
   List<String> weekdays = ['월', '화', '수', '목', '금', '토', '일'];
   return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}(${weekdays[dateTime.weekday - 1]}) ${dateTime.hour.toString().padLeft(2, '0')}시 이후';
+}
+
+/// 기차 조건 선택 날짜 반환
+String getDataForTrainUntilWeekDay(DateTime dateTime) {
+  List<String> weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+  return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}(${weekdays[dateTime.weekday - 1]})';
 }

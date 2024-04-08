@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:srt_ljh/common/colors.dart';
 import 'package:srt_ljh/common/strings.dart';
-import 'package:srt_ljh/ui/dialog/select_people_provider.dart';
+import 'package:srt_ljh/ui/main/provider/select_people_provider.dart';
 import 'package:srt_ljh/ui/widget/custom_button.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
 
