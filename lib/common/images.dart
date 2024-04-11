@@ -17,5 +17,7 @@ class AppImages {
   static const IMAGE_ARROW_RIGHT = "assets/images/arrow_right.png";
   static const IMAGE_ERROR = "assets/images/ico_error.png";
   static const IMAGE_ERROR_DARK = "assets/images/ico_error_dark.png";
-  static const IMAGE_ARROW_BLUE = "assets/images/ico_arrow_blue.png";
+  static const IMAGE_ICO_ARROW_BLUE = "assets/images/ico_arrow_blue.png";
+  static const IMAGE_ICO_TERMS_CHECK = "assets/images/ico_terms_check.png";
+  static const IMAGE_ICO_TERMS_CHECKED = "assets/images/ico_terms_checked.png";
 }

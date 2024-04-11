@@ -8,20 +8,22 @@ class CommonDialog {
   /// 에러 팝업 노출
   static void showErrDialog(
       BuildContext context, String content, String leftText, String rightText) {
-    showSimpleDialog(context, content, leftText, rightText);
+    showSimpleDialog(context, content, leftText, rightText, null);
   }
 
   /// 팝업 노출
-  static void showSimpleDialog(
-      BuildContext context, String content, String leftText, String rightText) {
+  static void showSimpleDialog(BuildContext context, String content,
+      String leftText, String rightText, Function? rightTextClicked) {
     showDialog(
         barrierColor: clr_B2000000,
+        barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
-          Color rightTextColor =
-              leftText.isNotEmpty ? clr_476eff : Theme.of(context).colorScheme.onSurface;
+          Color rightTextColor = leftText.isNotEmpty
+              ? clr_476eff
+              : Theme.of(context).colorScheme.onSurface;
           return Dialog(
-          backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
+            backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
             insetPadding: const EdgeInsets.symmetric(horizontal: 42),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.0),
@@ -32,7 +34,9 @@ class CommonDialog {
                 Container(
                   margin: const EdgeInsets.only(
                       top: 34, left: 32, right: 32, bottom: 28),
-                  child: NotoSansText(text: content, textColor: Theme.of(context).colorScheme.onSurface),
+                  child: NotoSansText(
+                      text: content,
+                      textColor: Theme.of(context).colorScheme.onSurface),
                 ),
                 Container(
                   width: double.infinity,
@@ -51,7 +55,10 @@ class CommonDialog {
                               height: 53,
                               child: Center(
                                   child: NotoSansText(
-                                      text: leftText, textColor: Theme.of(context).colorScheme.onSurface)),
+                                      text: leftText,
+                                      textColor: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface)),
                             )),
                         Container(
                           width: 1.0,
@@ -63,6 +70,7 @@ class CommonDialog {
                           flex: 1,
                           child: InkWell(
                             onTap: () {
+                              rightTextClicked?.call();
                               context.pop();
                             },
                             child: SizedBox(

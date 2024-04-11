@@ -141,4 +141,22 @@ class SrtRepository {
       return ApiResult.error(e.toString());
     }
   }
+
+  /// srt 예매하기 
+  Future<ApiResult<BaseResponse>> requestSrtReserve(Map<String, dynamic> params) async {
+      String jsonData = jsonEncode(params);
+    try {
+      final response = await dio.post(API_SRT_RESERVE,data: jsonData);
+      if (response.statusCode == 200) {
+        return ApiResult.success(BaseResponse(
+            code: response.data['code'],
+            message: response.data['message'],
+            data: response.data['data']));
+      } else {
+        return ApiResult.error('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      return ApiResult.error(e.toString());
+    }
+  }
 }

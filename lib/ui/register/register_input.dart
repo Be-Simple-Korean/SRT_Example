@@ -62,10 +62,15 @@ class _RegisterInputState extends State<RegisterInput> {
 
   @override
   void dispose() {
+    pwd2FocusNode.dispose();
+    nameFocusNode.dispose();
+    birthFocusNode.dispose();
     pwd1FocusNode.dispose();
     pwd2Controller.dispose();
     pwd1Controller.dispose();
     pwd2Controller.dispose();
+    nameController.dispose();
+    birthController.dispose();
     super.dispose();
   }
 

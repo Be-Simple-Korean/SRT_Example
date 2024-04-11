@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -13,16 +11,12 @@ import 'package:srt_ljh/ui/widget/custom_button.dart';
 import 'package:srt_ljh/ui/widget/custom_dialog.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
 
-/**
- * TODO 최근 검색 구간
- * 
- *  */
 /// 역 선택 화면
 class SelectStation extends StatefulWidget {
-  const SelectStation({super.key, required this.extras});
+  const SelectStation(
+      {super.key, required this.extras});
 
   final Map<String, dynamic> extras;
-
   @override
   State<SelectStation> createState() => _SelectStationState();
 }
@@ -35,8 +29,8 @@ class _SelectStationState extends State<SelectStation> {
   void initState() {
     super.initState();
     _isStart = widget.extras["isStart"];
-    if (widget.extras["startStation"] != SELECT_STATION_DEFAULT &&
-        widget.extras["finishStation"] != SELECT_STATION_DEFAULT) {
+    if (widget.extras["startStation"]["stationNm"] != SELECT_STATION_DEFAULT &&
+        widget.extras["finishStation"]["stationNm"] != SELECT_STATION_DEFAULT) {
       isButtonEnabled = true;
     }
   }
@@ -47,7 +41,9 @@ class _SelectStationState extends State<SelectStation> {
         child: Scaffold(
       body: ChangeNotifierProvider(
           create: (context) => SelectPlaceNotifier(
-              widget.extras["startStation"], widget.extras["finishStation"]),
+              widget.extras["startStation"],
+              widget.extras["finishStation"],
+                  widget.extras["stationList"],),
           builder: (context, child) {
             return Column(
               children: [
@@ -147,8 +143,14 @@ class _SelectStationState extends State<SelectStation> {
                             isEnabled: isButtonEnabled,
                             callback: () {
                               context.pop({
-                                SELECT_STATION_START: Provider.of<SelectPlaceNotifier>(context,listen: false).getStartStationInfo,
-                                SELECT_STATION_FINISH: Provider.of<SelectPlaceNotifier>(context,listen: false).getFinishStationInfo
+                                SELECT_STATION_START:
+                                    Provider.of<SelectPlaceNotifier>(context,
+                                            listen: false)
+                                        .getStartStationInfo,
+                                SELECT_STATION_FINISH:
+                                    Provider.of<SelectPlaceNotifier>(context,
+                                            listen: false)
+                                        .getFinishStationInfo
                               });
                             },
                           ),
@@ -415,95 +417,75 @@ class SelectStationGridView extends StatefulWidget {
 
 class _SelectStationGridViewState extends State<SelectStationGridView> {
   int selectedIndex = -1;
-  Future<List<dynamic>>? myFuture;
+
   @override
   void initState() {
     super.initState();
-    myFuture = readJsonFile();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<dynamic>>(
-        future: myFuture,
-        builder: ((context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            var data = snapshot.data;
-            selectedIndex =
-                Provider.of<SelectPlaceNotifier>(context).selectedIndex;
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: snapshot.data?.length ?? 0,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () async {
-                        String station = data?[index]["stationNm"];
-                        bool isSame = await getCompareStation(context, station);
-                        if (isSame) {
-                          if (mounted) {
-                            CommonDialog.showErrDialog(
-                                context,
-                                SELECT_STATION_SELECT_ERROR_MESSAGE,
-                                "",
-                                ALL_CONFIRM);
-                          }
-                          return;
-                        }
-                        if (mounted) {
-                          Provider.of<SelectPlaceNotifier>(context,
-                                  listen: false)
-                              .selectIndex(index);
-                          widget.stationCallback(data?[index]);
-                        }
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            color: index == selectedIndex
-                                ? clr_476eff
-                                : Theme.of(context).colorScheme.surface,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                                color: Theme.of(context).colorScheme.outline,
-                                width: 1.0)),
-                        child: NotoSansText(
-                          text: data?[index]["stationNm"] ?? "",
-                          textSize: 13,
-                          fontWeight: FontWeight.w500,
-                          textColor: index == selectedIndex
-                              ? Colors.white
-                              : Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    );
-                  },
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 151 / 52,
-                    crossAxisSpacing: 10.0, // 아이템 간 가로 간격
-                    mainAxisSpacing: 10.0, // 아이템 간 세로 간격),
-                  )),
+    selectedIndex = Provider.of<SelectPlaceNotifier>(context).selectedIndex;
+    var data =
+        Provider.of<SelectPlaceNotifier>(context, listen: false).stationList;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: data.length,
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () async {
+                String station = data[index]["stationNm"];
+                bool isSame = await getCompareStation(context, station);
+                if (isSame) {
+                  if (mounted) {
+                    CommonDialog.showErrDialog(context,
+                        SELECT_STATION_SELECT_ERROR_MESSAGE, "", ALL_CONFIRM);
+                  }
+                  return;
+                }
+                if (mounted) {
+                  Provider.of<SelectPlaceNotifier>(context, listen: false)
+                      .selectIndex(index);
+                  widget.stationCallback(data[index]);
+                }
+              },
+              child: Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                    color: index == selectedIndex
+                        ? clr_476eff
+                        : Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                        width: 1.0)),
+                child: NotoSansText(
+                  text: data[index]["stationNm"] ?? "",
+                  textSize: 13,
+                  fontWeight: FontWeight.w500,
+                  textColor: index == selectedIndex
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
             );
-          } else {
-            return CircularProgressIndicator();
-          }
-        }));
-  }
-
-  Future<List<dynamic>> readJsonFile() async {
-    // 파일 읽기
-    final String response = await rootBundle.loadString('assets/stations.json');
-    // JSON 변환
-    final data = await json.decode(response);
-    return data;
+          },
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 151 / 52,
+            crossAxisSpacing: 10.0, // 아이템 간 가로 간격
+            mainAxisSpacing: 10.0, // 아이템 간 세로 간격),
+          )),
+    );
   }
 
   Future<bool> getCompareStation(BuildContext context, String station) async {
     String selectedStartStation =
-        Provider.of<SelectPlaceNotifier>(context, listen: false).getStartStationName;
+        Provider.of<SelectPlaceNotifier>(context, listen: false)
+            .getStartStationName;
     if (selectedStartStation == station) {
       return true;
     } else {

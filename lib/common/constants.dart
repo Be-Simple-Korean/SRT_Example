@@ -10,11 +10,15 @@ const API_SIGN_UP = "/signup";
 const API_LOGIN = "/login";
 // 메인
 const API_SRT_INFO = "/srtInfo";
-// 메인
+// 기차 조회
 const API_SRT_LIST = "/srtList";
+// 기차 예매
+const API_SRT_RESERVE = "/reserve";
 
 const SUCCESS_MESSAGE = "SUCCESS";
 
 const FONT_NOTOSANS = "MyNotoSans";
 
-const PREFS_KEY_ID = "id";
+const PREF_KEY_ID = "pref_id";
+const PREF_KEY_NAME = "pref_name";
+const PREF_KEY_STATION_INFO = "pref_station_info";

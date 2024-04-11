@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:srt_ljh/common/Constants.dart';
 import 'package:srt_ljh/common/colors.dart';
+import 'package:srt_ljh/common/constants.dart';
 import 'package:srt_ljh/common/images.dart';
 import 'package:srt_ljh/common/strings.dart';
-import 'package:srt_ljh/common/Utils.dart';
+import 'package:srt_ljh/common/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:srt_ljh/model/base_response.dart';
 import 'package:srt_ljh/ui/login/login_viewmodel.dart';
@@ -38,6 +38,8 @@ class _LoginAppState extends State<LoginScreen> {
     switch (result.code) {
       case 0:
         if (result.message == SUCCESS_MESSAGE) {
+          SharedPreferences pref = await SharedPreferences.getInstance();
+          pref.setString(PREF_KEY_NAME, result.data?["name"].toString()??"");
           GoRouter.of(context).push(getRoutePath([ROUTER_MAIN_PATH]));
         } else {}
         break;
@@ -61,7 +63,7 @@ class _LoginAppState extends State<LoginScreen> {
   /// id 가져오기
   Future<void> getId() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    id = pref.getString(PREFS_KEY_ID) ?? "";
+    id = pref.getString(PREF_KEY_ID) ?? "";
     if (id.isNotEmpty) {
       setState(() {
         isSaved = true;
@@ -177,12 +179,12 @@ class _LoginAppState extends State<LoginScreen> {
                           SharedPreferences pref =
                               await SharedPreferences.getInstance();
                           if (isToggle) {
-                            pref.setString(PREFS_KEY_ID, id);
+                            pref.setString(PREF_KEY_ID, id);
                             setState(() {
                               isSaved = true;
                             });
                           } else {
-                            pref.setString(PREFS_KEY_ID, "");
+                            pref.setString(PREF_KEY_ID, "");
                             setState(() {
                               isSaved = false;
                             });

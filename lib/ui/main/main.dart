@@ -26,10 +26,10 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mainViewmodel = Provider.of<MainViewModel>(context, listen: false);
+    final mainViewModel = Provider.of<MainViewModel>(context, listen: false);
 
     return SafeArea(
-      child: Main(mainViewmodel: mainViewmodel),
+      child: Main(mainViewModel: mainViewModel),
     );
   }
 }
@@ -38,9 +38,9 @@ class MainScreen extends StatelessWidget {
 class Main extends StatefulWidget {
   const Main({
     super.key,
-    required this.mainViewmodel,
+    required this.mainViewModel,
   });
-  final MainViewModel mainViewmodel;
+  final MainViewModel mainViewModel;
   @override
   State<Main> createState() => _MainScreenState();
 }
@@ -54,7 +54,7 @@ class _MainScreenState extends State<Main> {
 
   @override
   void initState() {
-    myFuture = widget.mainViewmodel.requestSrtInfo();
+    myFuture = widget.mainViewModel.requestSrtInfo();
     scaffoldKey = GlobalKey<ScaffoldState>();
     super.initState();
   }
@@ -91,12 +91,16 @@ class _MainScreenState extends State<Main> {
       case 0:
         if (result.message == SUCCESS_MESSAGE) {
           result.data?["startStation"] =
-              widget.mainViewmodel.startInfoMap["stationNm"];
+              widget.mainViewModel.startInfoMap["stationNm"];
           result.data?["finishStation"] =
-              widget.mainViewmodel.finishInfoMap["stationNm"];
-          result.data?["selectPeople"] = widget.mainViewmodel.getSelectedPeople;
+              widget.mainViewModel.finishInfoMap["stationNm"];
+          result.data?["selectPeople"] = widget.mainViewModel.getSelectedPeople;
           result.data?["selectedDay"] =
-              getDataForTrainUntilWeekDay(widget.mainViewmodel.getSelectedDay);
+              getDataForTrainUntilWeekDay(widget.mainViewModel.getSelectedDay);
+          result.data?["startId"] =
+              widget.mainViewModel.startInfoMap["stationId"];
+          result.data?["finishId"] =
+              widget.mainViewModel.finishInfoMap["stationId"];
           GoRouter.of(context).push(
               getRoutePath([ROUTER_MAIN_PATH, ROUTER_SEARCH_TRAIN]),
               extra: result.data);
@@ -303,10 +307,19 @@ class _MainScreenState extends State<Main> {
                 const SizedBox(
                   height: 20,
                 ),
-                const RecentReservation(),
-                const SizedBox(
-                  height: 20,
-                ),
+                if (widget.mainViewModel.recentStation.isNotEmpty) ...[
+                  RecentReservation(
+                    selectedItem: (stationInfo) {
+                      widget.mainViewModel.setStartStation(widget.mainViewModel
+                          .getStationInfoMap(stationInfo.split("→")[0].trim()));
+                      widget.mainViewModel.setFinishStation(widget.mainViewModel
+                          .getStationInfoMap(stationInfo.split("→")[1].trim()));
+                    },
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                ],
                 SelectTrainCondition(
                     title: MAIN_SELECT_DATE_TITLE,
                     defaultData: getDataForTrainUntilHour(DateTime.now())),
@@ -327,7 +340,7 @@ class _MainScreenState extends State<Main> {
                     width: double.infinity,
                     text: MAIN_SEARCH_TRAIN,
                     callback: () async {
-                      var result = await widget.mainViewmodel.requestSrtList();
+                      var result = await widget.mainViewModel.requestSrtList();
                       if (result != null && mounted) {
                         handleSrtListResult(context, result);
                       }
@@ -562,15 +575,6 @@ class StationBar extends StatefulWidget {
 }
 
 class _StationBarState extends State<StationBar> {
-  Map<String, dynamic> startStation = {
-    "stationNm": SELECT_STATION_DEFAULT,
-    "stationId": ""
-  };
-  Map<String, dynamic> finishStation = {
-    "stationNm": SELECT_STATION_DEFAULT,
-    "stationId": ""
-  };
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -605,7 +609,8 @@ class _StationBarState extends State<StationBar> {
                       height: 6,
                     ),
                     NotoSansText(
-                      text: startStation["stationNm"],
+                      text: Provider.of<MainViewModel>(context)
+                          .startInfoMap["stationNm"],
                       textColor: Colors.white,
                       textSize: 24,
                       fontWeight: FontWeight.bold,
@@ -618,12 +623,19 @@ class _StationBarState extends State<StationBar> {
               height: 48,
               child: InkWell(
                   onTap: () {
-                    if (startStation != SELECT_STATION_DEFAULT &&
-                        finishStation != SELECT_STATION_DEFAULT) {
+                    if (Provider.of<MainViewModel>(context)
+                                .startInfoMap["stationNm"] !=
+                            SELECT_STATION_DEFAULT &&
+                        Provider.of<MainViewModel>(context)
+                                .finishInfoMap["stationNm"] !=
+                            SELECT_STATION_DEFAULT) {
                       setState(() {
-                        var temp = startStation;
-                        startStation = finishStation;
-                        finishStation = temp;
+                        var temp =
+                            Provider.of<MainViewModel>(context).startInfoMap;
+                        Provider.of<MainViewModel>(context).startInfoMap =
+                            Provider.of<MainViewModel>(context).finishInfoMap;
+                        Provider.of<MainViewModel>(context).finishInfoMap =
+                            temp;
                       });
                     }
                   },
@@ -642,11 +654,12 @@ class _StationBarState extends State<StationBar> {
                     textColor: Theme.of(context).colorScheme.onPrimaryContainer,
                     textSize: 13,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 6,
                   ),
                   NotoSansText(
-                    text: finishStation["stationNm"],
+                    text: Provider.of<MainViewModel>(context)
+                        .finishInfoMap["stationNm"],
                     textColor: Colors.white,
                     textSize: 24,
                     fontWeight: FontWeight.bold,
@@ -663,8 +676,10 @@ class _StationBarState extends State<StationBar> {
   void moveToSelectStation(BuildContext context, bool isStart) async {
     Map<String, dynamic> extras = {
       "isStart": isStart,
-      "startStation": startStation,
-      "finishStation": finishStation
+      "startStation": Provider.of<MainViewModel>(context,listen: false).startInfoMap,
+      "finishStation": Provider.of<MainViewModel>(context,listen: false).finishInfoMap,
+      "stationList":
+          Provider.of<MainViewModel>(context, listen: false).stationList
     };
     var result = await context.push(
         getRoutePath([ROUTER_MAIN_PATH, ROUTER_SELECT_STATION_PATH]),
@@ -672,23 +687,20 @@ class _StationBarState extends State<StationBar> {
     if (result == null) {
       return;
     }
-    setState(() {
-      startStation = result[SELECT_STATION_START];
-      finishStation = result[SELECT_STATION_FINISH];
-    });
     if (mounted) {
       Provider.of<MainViewModel>(context, listen: false)
-          .setStartStation(startStation);
+          .setStartStation(result[SELECT_STATION_START]);
       Provider.of<MainViewModel>(context, listen: false)
-          .setFinishStation(finishStation);
+          .setFinishStation(result[SELECT_STATION_FINISH]);
     }
   }
 }
 
 /// 최근 예매 구간 위젯
 class RecentReservation extends StatelessWidget {
-  const RecentReservation({super.key});
+  const RecentReservation({super.key, required this.selectedItem});
 
+  final Function(String) selectedItem;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -706,9 +718,20 @@ class RecentReservation extends StatelessWidget {
           child: ListView.builder(
             clipBehavior: Clip.none,
             scrollDirection: Axis.horizontal,
-            itemCount: 4,
+            itemCount: Provider.of<MainViewModel>(context, listen: false)
+                .recentStation
+                .length,
             itemBuilder: (context, index) {
-              return const RecentReservationItem();
+              return InkWell(
+                onTap: () {
+                  selectedItem.call(
+                      Provider.of<MainViewModel>(context, listen: false)
+                          .recentStation[index]);
+                },
+                child: RecentReservationItem(
+                    text: Provider.of<MainViewModel>(context, listen: false)
+                        .recentStation[index]),
+              );
             },
           ),
         )
@@ -719,8 +742,8 @@ class RecentReservation extends StatelessWidget {
 
 /// 최근 예매 아이템
 class RecentReservationItem extends StatelessWidget {
-  const RecentReservationItem({super.key});
-
+  const RecentReservationItem({super.key, required this.text});
+  final String text;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -735,7 +758,7 @@ class RecentReservationItem extends StatelessWidget {
       ),
       child: Center(
           child: NotoSansText(
-        text: "수서 -> 동탄",
+        text: text,
         textSize: 14,
         fontWeight: FontWeight.w500,
         textColor: Theme.of(context).colorScheme.onSecondaryContainer,
@@ -846,11 +869,11 @@ class _AutoScrollBannerState extends State<AutoScrollBanner> {
   void _resetTimer() {
     if (widget.bannerList.length > 1) {
       _timer?.cancel();
-      _timer = Timer.periodic(Duration(seconds: 10), (Timer timer) {
+      _timer = Timer.periodic(const Duration(seconds: 10), (Timer timer) {
         _currentPage++;
         _pageController.animateToPage(
           _currentPage,
-          duration: Duration(milliseconds: 350),
+          duration: const Duration(milliseconds: 350),
           curve: Curves.easeIn,
         );
       });

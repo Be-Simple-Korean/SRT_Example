@@ -4,12 +4,16 @@ import 'package:srt_ljh/common/strings.dart';
 class SelectPlaceNotifier extends ChangeNotifier {
   Map<String, dynamic> startInfoMap = {};
   Map<String, dynamic> finishInfoMap = {};
+  List<dynamic> stationList = [];
+
   int _selectedIndex = -1;
 
   int get selectedIndex => _selectedIndex;
 
   SelectPlaceNotifier(
-      Map<String, dynamic> startInfoMap, Map<String, dynamic> finishInfoMap) {
+      Map<String, dynamic> startInfoMap,
+      Map<String, dynamic> finishInfoMap,
+      this.stationList) {
     this.startInfoMap = initStation(startInfoMap);
     this.finishInfoMap = initStation(finishInfoMap);
   }

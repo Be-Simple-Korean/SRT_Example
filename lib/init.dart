@@ -15,6 +15,10 @@ import 'package:srt_ljh/ui/register/register_auth.dart';
 import 'package:srt_ljh/ui/register/reigster_input_viewmodel.dart';
 import 'package:srt_ljh/ui/notification/notification.dart';
 import 'package:srt_ljh/ui/notification/notification_viewmodel.dart';
+import 'package:srt_ljh/ui/reserve_train/reserve_train_info.dart';
+import 'package:srt_ljh/ui/reserve_train/reserve_train_info_viewmodel.dart';
+import 'package:srt_ljh/ui/reserve_train/reserve_train_input.dart';
+import 'package:srt_ljh/ui/reserve_train/reserve_train_input_viewmodel.dart';
 import 'package:srt_ljh/ui/search_train/search_train.dart';
 
 void main() {
@@ -96,7 +100,8 @@ final GoRouter _router = GoRouter(
             builder: (context, state) {
               var extras = state.extra as Map<String, dynamic>;
               return PopScope(
-                  canPop: false, child: SelectStation(extras: extras));
+                  canPop: false,
+                  child: SelectStation(extras: extras));
             },
           ),
           GoRoute(
@@ -111,19 +116,43 @@ final GoRouter _router = GoRouter(
             },
           ),
           GoRoute(
-            path: ROUTER_SEARCH_TRAIN,
-            builder: (context, state) {
-              var extra = state.extra as Map<String, dynamic>;
-              return PopScope(
-                  canPop: false,
-                  child: ChangeNotifierProvider(
-                      create: (context) =>
-                          SearchTrainViewModel(SrtRepository()),
-                      child: SearchTrain(
-                        result: extra,
-                      )));
-            },
-          )
+              path: ROUTER_SEARCH_TRAIN,
+              builder: (context, state) {
+                var extra = state.extra as Map<String, dynamic>;
+                return PopScope(
+                    canPop: false,
+                    child: ChangeNotifierProvider(
+                        create: (context) =>
+                            SearchTrainViewModel(SrtRepository()),
+                        child: SearchTrain(
+                          result: extra,
+                        )));
+              },
+              routes: [
+                GoRoute(
+                  path: ROUTER_RESERVE_TRAIN_INPUT,
+                  builder: (context, state) {
+                    var extra = state.extra as Map<String, dynamic>;
+                    return PopScope(
+                        canPop: false,
+                        child: ChangeNotifierProvider(
+                            create: (context) => ReserveTrainInputProvider(),
+                            child: ReserveTrainInput(result: extra)));
+                  },
+                ),
+                GoRoute(
+                  path: ROUTER_RESERVE_TRAIN_INFO,
+                  builder: (context, state) {
+                    var extra = state.extra as Map<String, dynamic>;
+                    return PopScope(
+                        canPop: false,
+                        child: ChangeNotifierProvider(
+                            create: (context) => ReserveTrainInfoViewModel(
+                                SrtRepository(), extra),
+                            child: ReserveTrainInfo()));
+                  },
+                )
+              ])
         ])
   ],
 );

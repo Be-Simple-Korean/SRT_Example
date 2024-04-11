@@ -5,6 +5,8 @@ const ROUTER_MAIN_PATH = '/main';
 const ROUTER_SELECT_STATION_PATH = 'select_station';
 const ROUTER_NOTIFICATION = 'notification';
 const ROUTER_SEARCH_TRAIN = 'search_train';
+const ROUTER_RESERVE_TRAIN_INPUT = 'reserve_train_input';
+const ROUTER_RESERVE_TRAIN_INFO = 'reserve_train_info';
 
 const ALL_SELECT_ALL = "선택완료";
 const ALL_CONFIRM = "확인";

@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:srt_ljh/common/colors.dart';
 import 'package:srt_ljh/common/images.dart';
 import 'package:srt_ljh/common/my_logger.dart';
+import 'package:srt_ljh/common/strings.dart';
 import 'package:srt_ljh/common/theme_provider.dart';
+import 'package:srt_ljh/common/utils.dart';
 import 'package:srt_ljh/ui/widget/notosans_text.dart';
 
 class SearchTrain extends StatelessWidget {
@@ -123,8 +125,8 @@ class SearchTrain extends StatelessWidget {
                                       left: 17.5, right: 16.5),
                                   width: 16,
                                   height: 16,
-                                  child:
-                                      Image.asset(AppImages.IMAGE_ARROW_BLUE),
+                                  child: Image.asset(
+                                      AppImages.IMAGE_ICO_ARROW_BLUE),
                                 ),
                                 NotoSansText(
                                   text: getFormatTime(result["trainInfoList"]
@@ -135,38 +137,71 @@ class SearchTrain extends StatelessWidget {
                                   textSize: 13,
                                 ),
                                 Spacer(),
-                                Container(
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                      color:
-                                          Theme.of(context).colorScheme.surface,
-                                      border: Border.all(
-                                          width: 1.0,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .outline),
-                                      borderRadius: BorderRadius.circular(10)),
-                                  height: 40,
-                                  width: 60,
-                                  child: NotoSansText(
-                                    text: (result["trainInfoList"][index]
-                                                ["reserveYN"] ==
-                                            "Y")
-                                        ? "예매가능"
-                                        : "매진",
-                                    textColor: (result["trainInfoList"][index]
-                                                ["reserveYN"] ==
-                                            "Y")
-                                        ? (Provider.of<ThemeProvider>(context)
-                                                .isDarkMode()
-                                            ? clr_dedede
-                                            : Colors.black)
-                                        : (Provider.of<ThemeProvider>(context)
-                                                .isDarkMode()
-                                            ? clr_6A6F7D
-                                            : clr_cccccc),
-                                    fontWeight: FontWeight.w500,
-                                    textSize: 12,
+                                InkWell(
+                                  onTap: () {
+                                    Map<String, dynamic> resultData = {};
+                                    resultData["startId"]=result["startId"];
+                                    resultData["finishId"]=result["finishId"];
+                                    resultData["startStation"] =
+                                        result["startStation"];
+                                    resultData["finishStation"] =
+                                        result["finishStation"];
+                                    resultData["selectedDay"] =
+                                        result["selectedDay"];
+                                    resultData["selectedPeople"] =
+                                        result["selectPeople"];
+                                    resultData["trainno"] =
+                                        result["trainInfoList"][index]
+                                            ["trainno"];
+                                    resultData["depplandtime"] =
+                                        result["trainInfoList"][index]
+                                            ["depplandtime"];
+                                    resultData["arrplandtime"] =
+                                        result["trainInfoList"][index]
+                                            ["arrplandtime"];
+                                    context.push(
+                                        getRoutePath([
+                                          ROUTER_MAIN_PATH,
+                                          ROUTER_SEARCH_TRAIN,
+                                          ROUTER_RESERVE_TRAIN_INPUT
+                                        ]),
+                                        extra: resultData);
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surface,
+                                        border: Border.all(
+                                            width: 1.0,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .outline),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    height: 40,
+                                    width: 60,
+                                    child: NotoSansText(
+                                      text: (result["trainInfoList"][index]
+                                                  ["reserveYN"] ==
+                                              "N")
+                                          ? "예매가능"
+                                          : "매진",
+                                      textColor: (result["trainInfoList"][index]
+                                                  ["reserveYN"] ==
+                                              "N")
+                                          ? (Provider.of<ThemeProvider>(context)
+                                                  .isDarkMode()
+                                              ? clr_dedede
+                                              : Colors.black)
+                                          : (Provider.of<ThemeProvider>(context)
+                                                  .isDarkMode()
+                                              ? clr_6A6F7D
+                                              : clr_cccccc),
+                                      fontWeight: FontWeight.w500,
+                                      textSize: 12,
+                                    ),
                                   ),
                                 )
                               ],
